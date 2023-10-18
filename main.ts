@@ -1,16 +1,16 @@
 class Instance {
+    major: string;
     num: number;
-    title: string;
     prereq: string;
     fall: boolean;
     spring: boolean;
 
     constructor(num: number, title: string, prereq: string){
-      this.num = num;
-      this.title = title;
-      this.prereq = prereq;
-      this.fall = false;
-      this.spring = false;
+        this.major = this.major;
+        this.num = num;
+        this.prereq = prereq;
+        this.fall = false;
+        this.spring = false;
     }
 }
 
