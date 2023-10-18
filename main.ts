@@ -1,3 +1,5 @@
+import * as fs from "fs";
+
 class Instance {
     major: string;
     num: number;
@@ -13,6 +15,27 @@ class Instance {
         this.spring = false;
     }
 }
+const filePath = 'path/to/your/file.txt';
+
+function readFile(filePath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  }
+
+readFile(filePath)
+  .then(data => {
+    console.log(data); // File content as a string
+  })
+  .catch(error => {
+    console.error(error);
+  });
 
 interface _List<T> { 
     isEmpty: () => boolean;
