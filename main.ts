@@ -15,7 +15,7 @@ class Instance {
         this.spring = false;
     }
 }
-const filePath = 'path/to/your/file.txt';
+const filePath = '../Classes.txt';
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
