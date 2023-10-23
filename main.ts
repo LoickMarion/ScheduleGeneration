@@ -15,7 +15,7 @@ class Instance {
         this.spring = false;
     }
 }
-const filePath = 'path/to/your/file.txt';
+const filePath = '../Classes.txt';
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -47,6 +47,6 @@ interface _List<T> {
     function empty<T>(): List<T> {return { isEmpty:() => true, head:() => { throw new Error(); }, tail: () => { throw new Error(); }
 }
 }
-
+console.log("hi")
 //Elective here, click to insert 
 //hashmap
