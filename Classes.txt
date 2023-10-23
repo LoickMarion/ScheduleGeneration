@@ -5,4 +5,3 @@ CS,220,[[210]],T,T
 CS,230,[[210]],T,T
 CS,240,[[160]],T,T
 CS,250,[[160]],T,T
-PoopyMajor, 4269,[[Penis]'[Chocolate Milk]],F,F
