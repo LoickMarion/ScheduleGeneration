@@ -15,7 +15,8 @@ class Instance {
         this.spring = false;
     }
 }
-const filePath = '../Classes.txt';
+/*
+//const filePath = '../Classes.txt';
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -36,7 +37,7 @@ readFile(filePath)
   .catch(error => {
     console.error(error);
   });
-
+*/
 interface _List<T> { 
     isEmpty: () => boolean;
     head: () => T; tail: () => List<T>; }
