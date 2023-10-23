@@ -15,7 +15,7 @@ class _class {
         this.spring = false;
     }
 }
-const filePath = '../Classes.txt';
+const filePath = './Classes.txt';
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -31,7 +31,7 @@ function readFile(filePath: string): Promise<string> {
 
 readFile(filePath)
   .then(data => {
-    console.log(data); // File content as a string
+    parser(data); 
   })
   .catch(error => {
     console.error(error);
@@ -48,5 +48,10 @@ interface _List<T> {
 }
 }
 
+
+function parser(data: String){
+  let textByLine = data.split("\n")
+        console.log(textByLine)
+}
 //Elective here, click to insert 
 //hashmap
