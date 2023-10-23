@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-class Instance {
+class _class {
     major: string;
     num: number;
     prereq: string;
