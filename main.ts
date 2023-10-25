@@ -7,16 +7,37 @@ class _class {
     fall: boolean;
     spring: boolean;
 
-    constructor(num: number, title: string, prereq: string){
-        this.major = this.major;
+    constructor(major: string, num: number, prereq: string, fall: boolean, spring: boolean){
+        this.major = major;
         this.num = num;
         this.prereq = prereq;
-        this.fall = false;
-        this.spring = false;
+        this.fall = fall;
+        this.spring = spring;
+    }
+
+    getMajor(){
+      return this.major;
+    }
+    getNum(){
+      return this.num;
+    }
+    getPrereq(){
+      return this.prereq;
+    }
+    getFall(){
+      return this.fall;
+    }
+    getSpring(){
+      return this.spring;
+    }
+
+    toString(){
+      const num = String(this.num);
+      const fall = String(this.fall);
+      const spring = String(this.spring);
+      return this.major + " " + num + " " + this.prereq + " " + fall + " " + spring;
     }
 }
-/*
-//const filePath = '../Classes.txt';
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -30,24 +51,27 @@ function readFile(filePath: string): Promise<string> {
     });
   }
 
+function parser(data: String){
+  const textByLine = data.split("\n");
+  const classList: _class[] = [];
+
+  for(let i = 0; i < textByLine.length; i++){
+    let val = textByLine[i].split(',');
+    let fall = val[3] === 'T';
+    let spring = val[4] === 'T';
+    const input = new _class(val[0],Number(val[1]),val[2],fall,spring);
+    console.log(input.toString());
+    classList.push(input);
+  }
+  return classList;
+}
+
+const filePath = './Classes.txt';
 readFile(filePath)
   .then(data => {
-    console.log(data); // File content as a string
+    parser(data); 
   })
   .catch(error => {
     console.error(error);
   });
-*/
-interface _List<T> { 
-    isEmpty: () => boolean;
-    head: () => T; tail: () => List<T>; }
-    type List<T> = Readonly<_List<T>>; // makes it immutable
-    function node<T>(data: T, rest: List<T>): List<T> {
-        return { isEmpty: () => false, head: () => data, tail: () => rest }; 
-    }
-    function empty<T>(): List<T> {return { isEmpty:() => true, head:() => { throw new Error(); }, tail: () => { throw new Error(); }
-}
-}
-console.log("hi")
-//Elective here, click to insert 
-//hashmap
+
