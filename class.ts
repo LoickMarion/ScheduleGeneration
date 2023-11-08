@@ -1,9 +1,9 @@
 export class _class {
-    major: string;
-    num: number;
-    prereq: string;
-    fall: boolean;
-    spring: boolean;
+    private major: string;
+    private num: number;
+    private prereq: string;
+    private fall: boolean;
+    private spring: boolean;
 
     constructor(major: string, num: number, prereq: string, fall: boolean, spring: boolean){
         this.major = major;
