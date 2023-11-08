@@ -1,43 +1,5 @@
 import * as fs from "fs";
-
-class _class {
-    major: string;
-    num: number;
-    prereq: string;
-    fall: boolean;
-    spring: boolean;
-
-    constructor(major: string, num: number, prereq: string, fall: boolean, spring: boolean){
-        this.major = major;
-        this.num = num;
-        this.prereq = prereq;
-        this.fall = fall;
-        this.spring = spring;
-    }
-
-    getMajor(){
-      return this.major;
-    }
-    getNum(){
-      return this.num;
-    }
-    getPrereq(){
-      return this.prereq;
-    }
-    getFall(){
-      return this.fall;
-    }
-    getSpring(){
-      return this.spring;
-    }
-
-    toString(){
-      const num = String(this.num);
-      const fall = String(this.fall);
-      const spring = String(this.spring);
-      return this.major + " " + num + " " + this.prereq + " " + fall + " " + spring;
-    }
-}
+import { _class } from "./class";
 
 function readFile(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -56,14 +18,16 @@ function parser(data: String){
   const classList: _class[] = [];
 
   for(let i = 0; i < textByLine.length; i++){
-    let val = textByLine[i].split(',');
-    let fall = val[3] === 'T';
-    let spring = val[4] === 'T';
-    const input = new _class(val[0],Number(val[1]),val[2],fall,spring);
+    let [major,number,prereq,fall,spring] = textByLine[i].split(',');
+    const input = new _class(major,Number(number),prereq, stringToBool(fall), stringToBool(spring));
     console.log(input.toString());
     classList.push(input);
   }
   return classList;
+}
+
+function stringToBool(s: string): boolean{
+  return (s === "T");
 }
 
 const filePath = './Classes.txt';
