@@ -18,8 +18,8 @@ function parser(data) {
     var textByLine = data.split("\n");
     var classList = [];
     for (var i = 0; i < textByLine.length; i++) {
-        var _a = textByLine[i].split(','), major = _a[0], number = _a[1], prereq = _a[2], fall = _a[3], spring = _a[4];
-        var input = new class_1._class(major, Number(number), prereq, stringToBool(fall), stringToBool(spring));
+        var _a = textByLine[i].split(','), major = _a[0], number = _a[1], prereq = _a[2], fall = _a[3], spring = _a[4], credits = _a[5];
+        var input = new class_1._class(major, Number(number), prereq, stringToBool(fall), stringToBool(spring), Number(credits));
         console.log(input.toString());
         classList.push(input);
     }

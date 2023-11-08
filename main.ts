@@ -18,8 +18,8 @@ function parser(data: String){
   const classList: _class[] = [];
 
   for(let i = 0; i < textByLine.length; i++){
-    let [major,number,prereq,fall,spring] = textByLine[i].split(',');
-    const input = new _class(major,Number(number),prereq, stringToBool(fall), stringToBool(spring));
+    let [major,number,prereq,fall,spring,credits] = textByLine[i].split(',');
+    const input = new _class(major,Number(number),prereq, stringToBool(fall), stringToBool(spring),Number(credits));
     console.log(input.toString());
     classList.push(input);
   }
