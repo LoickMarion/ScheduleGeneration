@@ -10,18 +10,21 @@ CS250
 CS305
 
 CS311
-CS320 or CS326
-CS300+
-CS300+
-CS300+ or outside
-CS400+
-CS400+
-CS400+
+Elective[300+]
+Elective[300+]
+Elective[300+]
+Elective[300+]
+Elective[300+,Math545]
+
+Elective[400+]
+Elective[400+]
+Elective[400+]
+
 
 MATH131
 MATH132
 MATH233
 MATH235
 
-Lab1
-Lab2
+Elective[CHEM111,PHYSICS151,PHYSICS181]
+Elective[CHEM112,PHYSICS152,PHYSICS182]
