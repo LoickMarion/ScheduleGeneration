@@ -38,3 +38,12 @@ but only needs to take MATH233 to fufill both)
 In text file, possibly separate majors in different files
 Pick Electives at start
 
+11/8 --
+Reconfigured readFile to be sycnronous, made the parser return a class list and also added a course map. Plan to
+use courseMap immutably, while class list will change according to classes taken, added, or removed. Edited prereqs
+in order to parse them into an array of strings, which will be used as keys in the courseMap in order to access
+easily. Started work on node and graph classes which we plan to eventually return the final product (schedule). Eventually,
+we want to use some sort of database to host our data, today we looked into Microsoft Azure SQL, however we need to
+learn more about the use cases and how to use it correctly before we integrate it. Also, we figured out live
+sharing in VSCode which was a literal life-saver. Loick was genuinely having heart palpatations until we figured
+it out. Plan to spend some more time working after our final midterms finish up. 

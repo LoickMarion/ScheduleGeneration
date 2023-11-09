@@ -1,41 +1,41 @@
 import * as fs from "fs";
-import { _class } from "./class";
+import { course } from "./course";
 
-function readFile(filePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
+function readFileSync(filePath: string): string {
+  try {
+      return fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+      console.error("Error reading file:", err);
+      return "";
   }
+}
 
-function parser(data: String){
+
+function data_to_course_map_parser(data: String){
+  const courseList: course[] = [];
   const textByLine = data.split("\n");
-  const classList: _class[] = [];
 
   for(let i = 0; i < textByLine.length; i++){
-    let [major,number,prereq,fall,spring,credits] = textByLine[i].split(',');
-    const input = new _class(major,Number(number),prereq, stringToBool(fall), stringToBool(spring),Number(credits));
-    console.log(input.toString());
-    classList.push(input);
+    let [major,number,prereq_string,fall,spring,credits] = textByLine[i].split(',');
+    let prereqs = prereq_string.split('&&')
+
+    const input = new course(major,Number(number),prereqs, stringToBool(fall), stringToBool(spring),Number(credits));
+
+    courseList.push(input)
   }
-  return classList;
+  return courseList
 }
 
 function stringToBool(s: string): boolean{
   return (s === "T");
 }
 
-const filePath = './Classes.txt';
-readFile(filePath)
-  .then(data => {
-    parser(data); 
-  })
-  .catch(error => {
-    console.error(error);
-  });
+const filePath = './CS_Classes.txt';
 
+const data = readFileSync(filePath);
+const classList = data ? data_to_course_map_parser(data): [];
+const classMap = new Map<string,course>();
+classList.forEach((course) => classMap.set(course.getMajor()+course.getNumber(),course));
+
+
+classList.forEach((course)=>console.log(course.toString()))
