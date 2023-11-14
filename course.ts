@@ -1,4 +1,4 @@
-export class course {
+export class Course {
     private major: string;
     private number: number;
     private prereqs: string[];
@@ -41,36 +41,66 @@ export class course {
       const credits = String(this.credits);
       return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
     }
+
+    hasPrereq(){
+      return this.getPrereq().length != 0;
+    }
 }
 
-export class Node<course>{
-  private data: course;
-  private courses_unlocked: Node<course>[];
+export class Node<T>{
+  private data: Course;
+  private coursesUnlocked: string[];
+  
 
-  constructor(data: course, courses_unlocked: Node<course>[]){
+  constructor(data: Course, coursesUnlocked: string[]){
     this.data = data;
-    this.courses_unlocked = courses_unlocked;
+    this.coursesUnlocked = coursesUnlocked;
+  }
+
+  getCourse(){
+    return this.data;
   }
   
-  addAdjacent(node: Node<course>){
-    this.courses_unlocked.push(node);
+  addAdjacent(course: string){
+    this.coursesUnlocked.push(course);
   }
-
 }
 
-export class Graph<Node>{
-  private node_list: Node[];
-  private courseMap: Map<string,course>;
-  private courseList: course[]
+export class Graph<T>{
+  //private node_list: Node<T>[];
+  private nodeMap: Map<string,Node<T>>;
+  private courseList: string[]
 
+  
 
-  constructor(node_list: Node[], courseMap: Map<string,course>, courseList: course[]){
-    this.node_list = node_list;
-    this.courseMap = courseMap;
+  constructor(nodeMap: Map<string,Node<T>>, courseList: string[]){
+    //this.node_list = node_list;
+    this.nodeMap = nodeMap;
     this.courseList = courseList;
+
+    this.addPrereqLinks()
   }
 
-  makeSchedule(){
-    return "a finished project! Thank you I'll take the paid internship."
+  addPrereqLinks(){
+    for (const course of this.courseList) {
+      const node = this.nodeMap.get(course);
+
+      if (node !== undefined) {
+
+        const list: string[] = node.getCourse().getPrereq();
+        for (const prereq of list) {
+
+          const prereqNode = this.nodeMap.get(prereq);
+          if (prereqNode !== undefined) {
+            prereqNode.addAdjacent(course);
+            this.nodeMap.set(prereq,prereqNode)
+          } 
+        }
+      } 
+    }
+  }
+
+  getNodeMap(){
+    return this.nodeMap;
   }
 }

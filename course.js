@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Node = exports.course = void 0;
-var course = /** @class */ (function () {
-    function course(major, number, prereqs, fall, spring, credits) {
+exports.Graph = exports.Node = exports.Course = void 0;
+var Course = /** @class */ (function () {
+    function Course(major, number, prereqs, fall, spring, credits) {
         this.major = major;
         this.number = number;
         this.prereqs = prereqs;
@@ -10,42 +10,81 @@ var course = /** @class */ (function () {
         this.spring = spring;
         this.credits = credits;
     }
-    course.prototype.getMajor = function () {
+    Course.prototype.getMajor = function () {
         return this.major;
     };
-    course.prototype.getNumber = function () {
+    Course.prototype.getNumber = function () {
         return this.number;
     };
-    course.prototype.getPrereq = function () {
+    Course.prototype.getPrereq = function () {
         return this.prereqs;
     };
-    course.prototype.getFall = function () {
+    Course.prototype.getFall = function () {
         return this.fall;
     };
-    course.prototype.getSpring = function () {
+    Course.prototype.getSpring = function () {
         return this.spring;
     };
-    course.prototype.getCredits = function () {
+    Course.prototype.getCredits = function () {
         return this.credits;
     };
-    course.prototype.toString = function () {
+    Course.prototype.toString = function () {
         var number = String(this.number);
         var fall = String(this.fall);
         var spring = String(this.spring);
         var credits = String(this.credits);
         return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
     };
-    return course;
+    Course.prototype.hasPrereq = function () {
+        return this.getPrereq().length != 0;
+    };
+    return Course;
 }());
-exports.course = course;
+exports.Course = Course;
 var Node = /** @class */ (function () {
-    function Node(data, courses_unlocked) {
+    function Node(data, Courses_unlocked) {
         this.data = data;
-        this.courses_unlocked = courses_unlocked;
+        this.Courses_unlocked = Courses_unlocked;
     }
-    Node.prototype.addAdjacent = function (node) {
-        this.courses_unlocked.push(node);
+    Node.prototype.getCourse = function () {
+        return this.data;
+    };
+    Node.prototype.addAdjacent = function (course) {
+        this.Courses_unlocked.push(course);
     };
     return Node;
 }());
 exports.Node = Node;
+var Graph = /** @class */ (function () {
+    function Graph(nodeMap, courseList) {
+        //this.node_list = node_list;
+        this.nodeMap = nodeMap;
+        this.courseList = courseList;
+        this.addPrereqLinks();
+    }
+    Graph.prototype.makeSchedule = function () {
+        return "a finished project! Thank you I'll take the paid internship.";
+    };
+    Graph.prototype.addPrereqLinks = function () {
+        for (var _i = 0, _a = this.courseList; _i < _a.length; _i++) {
+            var course = _a[_i];
+            var node = this.nodeMap.get(course);
+            if (node !== undefined) {
+                var list = node.getCourse().getPrereq();
+                for (var _b = 0, list_1 = list; _b < list_1.length; _b++) {
+                    var prereq = list_1[_b];
+                    var prereqNode = this.nodeMap.get(prereq);
+                    if (prereqNode !== undefined) {
+                        prereqNode.addAdjacent(course);
+                        this.nodeMap.set(prereq, prereqNode);
+                    }
+                }
+            }
+        }
+    };
+    Graph.prototype.getNodeMap = function () {
+        return this.nodeMap;
+    };
+    return Graph;
+}());
+exports.Graph = Graph;
