@@ -64,3 +64,13 @@ IDEAS:
 State upper level classes as '3XX', '4XX', etc. When "clicked", a drop down appears will all available options. When
 a class is chosen from the options, we can (through eventOnClick) add that course to the courseList and to our 
 directed graph, essentially integrating it into the user's class schedule while also updating any prereqs it may hold.
+
+11/29 --
+Got back to work after Thanksgiving Break and started to figure out the inner working of Azure Database & SQL. We were able
+to get a very small working model, and created a table with all of the CS courses (just major and number for now) that we had
+already created. We plan on creating another table for prerequisites, in which we list every course on the left, and its prereqs
+on the right. In this case, we can simply search for the course and all of its prerequisites will pop up. That is one task to do,
+others include furthering our understanding of SQL & Azure, and how to connect it all to our program. Beyond that, we believe
+that there is not that much more work to do, as James will start to focus on some front-end & server development, while Loick
+looks into fleshing out the back-end code. We both will collaborate on both parts together, but we figured we could divide & conquer
+in that area, as it is the least complex part and we both know how to do each part.
