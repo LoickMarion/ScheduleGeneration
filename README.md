@@ -38,3 +38,39 @@ but only needs to take MATH233 to fufill both)
 In text file, possibly separate majors in different files
 Pick Electives at start
 
+11/8 --
+Reconfigured readFile to be synchronous, made the parser return a class list and also added a course map. Plan to
+use courseMap immutably, while class list will change according to classes taken, added, or removed. Edited prereqs
+in order to parse them into an array of strings, which will be used as keys in the courseMap in order to access
+easily. Started work on node and graph classes which we plan to eventually return the final product (schedule). Eventually,
+we want to use some sort of database to host our data, today we looked into Microsoft Azure SQL, however we need to
+learn more about the use cases and how to use it correctly before we integrate it. Also, we figured out live
+sharing in VSCode which was a literal life-saver. Loick was genuinely having heart palpatations until we figured
+it out. Plan to spend some more time working after our final midterms finish up. 
+
+11/13 --
+Worked on some typescript essentials as we began to flesh out the graph class. Was able to get working nodes, now we
+need to work on adding courses to the coursesUnlocked array. We plan to essentially iterate through the text file
+(which we plan to eventually move to a database) and first add all classes to a classMap and a classList, which we 
+have done. Then, from those lists, create nodes from each with all of their information, which has also been done. The task
+ahead now is to "point" from a class node to the classes that are made available after the class is taken in our directed
+graph. Once we have that, we should be able to generate a basic 4 class per semester schedule with no input classes, based
+upon which classes are required. Longer term tasks include practice with front-end development, possibility for 12-19 credit
+semesters, solutions to non-specific required classes, such as upper level electives and gen-eds, and then eventually
+support for minors, double majors, etc. Progress has been great, and both developers have felt a great sense of learning
+and accomplishment as we tackle a Real-World problem solving issue through the use of code development.
+
+IDEAS:
+State upper level classes as '3XX', '4XX', etc. When "clicked", a drop down appears will all available options. When
+a class is chosen from the options, we can (through eventOnClick) add that course to the courseList and to our 
+directed graph, essentially integrating it into the user's class schedule while also updating any prereqs it may hold.
+
+11/29 --
+Got back to work after Thanksgiving Break and started to figure out the inner working of Azure Database & SQL. We were able
+to get a very small working model, and created a table with all of the CS courses (just major and number for now) that we had
+already created. We plan on creating another table for prerequisites, in which we list every course on the left, and its prereqs
+on the right. In this case, we can simply search for the course and all of its prerequisites will pop up. That is one task to do,
+others include furthering our understanding of SQL & Azure, and how to connect it all to our program. Beyond that, we believe
+that there is not that much more work to do, as James will start to focus on some front-end & server development, while Loick
+looks into fleshing out the back-end code. We both will collaborate on both parts together, but we figured we could divide & conquer
+in that area, as it is the least complex part and we both know how to do each part.

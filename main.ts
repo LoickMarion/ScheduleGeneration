@@ -1,77 +1,50 @@
 import * as fs from "fs";
+import { Course, Node, Graph } from "./course";
 
-class _class {
-    major: string;
-    num: number;
-    prereq: string;
-    fall: boolean;
-    spring: boolean;
-
-    constructor(major: string, num: number, prereq: string, fall: boolean, spring: boolean){
-        this.major = major;
-        this.num = num;
-        this.prereq = prereq;
-        this.fall = fall;
-        this.spring = spring;
-    }
-
-    getMajor(){
-      return this.major;
-    }
-    getNum(){
-      return this.num;
-    }
-    getPrereq(){
-      return this.prereq;
-    }
-    getFall(){
-      return this.fall;
-    }
-    getSpring(){
-      return this.spring;
-    }
-
-    toString(){
-      const num = String(this.num);
-      const fall = String(this.fall);
-      const spring = String(this.spring);
-      return this.major + " " + num + " " + this.prereq + " " + fall + " " + spring;
-    }
+function readFileSync(filePath: string): string {
+  try {
+      return fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+      console.error("Error reading file:", err);
+      return "";
+  }
 }
 
-function readFile(filePath: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
-  }
 
-function parser(data: String){
+function data_to_course_map_parser(data: String){
+  const courseList: Course[] = [];
   const textByLine = data.split("\n");
-  const classList: _class[] = [];
 
   for(let i = 0; i < textByLine.length; i++){
-    let val = textByLine[i].split(',');
-    let fall = val[3] === 'T';
-    let spring = val[4] === 'T';
-    const input = new _class(val[0],Number(val[1]),val[2],fall,spring);
-    console.log(input.toString());
-    classList.push(input);
+    let [major,number,prereq_string,fall,spring,credits] = textByLine[i].split(',');
+    let prereqs = prereq_string.split('&&')
+    const input = new Course(major,Number(number),prereqs, stringToBool(fall), stringToBool(spring),Number(credits));
+
+    courseList.push(input)
   }
-  return classList;
+  return courseList
 }
 
-const filePath = './Classes.txt';
-readFile(filePath)
-  .then(data => {
-    parser(data); 
-  })
-  .catch(error => {
-    console.error(error);
-  });
+function stringToBool(s: string): boolean{
+  return (s === "T");
+}
+
+const filePath = './CS_Classes.txt';
+
+const data = readFileSync(filePath);
+const classList = data ? data_to_course_map_parser(data): [];
+const classMap = new Map<string,Course>();
+let nodeMap = new Map<string,Node<Course>>();
+classList.forEach((Course) => nodeMap.set(Course.getMajor()+Course.getNumber(),new Node(Course,[])));
+const classStringList: string[] = [];
+classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getNumber()))
+//classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
+
+
+const a = new Graph<Node<Course>>(nodeMap,classStringList)
+const b = a.getNodeMap();
+const c = a.topoSort();
+//console.log(b.get("CS240"));
+console.log(c);
+
 
