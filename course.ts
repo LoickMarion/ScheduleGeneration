@@ -33,13 +33,18 @@ export class Course {
     getCredits(){
       return this.credits;
     }
-
-    toString(){
+    //this was originallycalled toString
+    getAttributes(){
       const number = String(this.number);
       const fall = String(this.fall);
       const spring = String(this.spring);
       const credits = String(this.credits);
       return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
+    }
+    //implemented this method to just get the id of course, eg CS220
+    toString(){
+      const number = String(this.number);
+      return this.major + number;
     }
 
     hasPrereq(){
@@ -64,6 +69,10 @@ export class Node<T>{
   addAdjacent(course: string){
     this.coursesUnlocked.push(course);
   }
+
+  getAdjacent(){
+    return this.coursesUnlocked;
+  }
 }
 
 export class Graph<T>{
@@ -80,7 +89,57 @@ export class Graph<T>{
 
     this.addPrereqLinks()
   }
+  topoSort(){
+    let finalList: string[] = []
+    let workingList: string[] = []
+    let incomingEdgeDict = new Map<string,number>();
+    //initalize each node iwth 0 incoming edges.
+    this.courseList.forEach((course) => incomingEdgeDict.set(course.toString(),0))
 
+    //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
+    //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
+    //good rudimentary model ig
+    this.courseList.forEach((course) => {
+      this.nodeMap.get(course)?.getAdjacent().forEach((courseName) => {
+          // Check if the key exists in the incomingEdgeDict
+          let pleaseWork = incomingEdgeDict.get(courseName)!
+
+          incomingEdgeDict.set(courseName, pleaseWork + 1);
+          let num = String(pleaseWork+1)
+          //console.log(courseName + "now has" + num + "edges")
+          
+      });
+    }); 
+    //add courses with no incoming edges to workingList.
+    this.courseList.forEach((course) => {
+      if(incomingEdgeDict.get(course)==0){
+        workingList.push(course.toString())
+      }
+    });
+
+    while(workingList.length > 0){
+      //take the first element of workingList and add it to finalList
+      let course = workingList.shift();
+      if(course){
+        finalList.push(course);
+
+        //add all nodes with one remianing prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
+        this.nodeMap.get(course)!.getAdjacent().forEach((courseName)=>{
+          if(incomingEdgeDict.get(courseName)==1){
+            workingList.push(courseName)
+          }
+          let pleaseWork = incomingEdgeDict.get(courseName)!
+          
+            incomingEdgeDict.set(courseName, pleaseWork - 1);
+          
+        });
+      }
+    }
+    return finalList;
+
+    
+    
+}
   addPrereqLinks(){
     for (const course of this.courseList) {
       const node = this.nodeMap.get(course);

@@ -43,5 +43,8 @@ classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getN
 
 const a = new Graph<Node<Course>>(nodeMap,classStringList)
 const b = a.getNodeMap();
+const c = a.topoSort();
+//console.log(b.get("CS240"));
+console.log(c);
 
-console.log(b.get("CS240"))
+

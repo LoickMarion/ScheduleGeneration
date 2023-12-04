@@ -28,12 +28,18 @@ var Course = /** @class */ (function () {
     Course.prototype.getCredits = function () {
         return this.credits;
     };
-    Course.prototype.toString = function () {
+    //this was originallycalled toString
+    Course.prototype.getAttributes = function () {
         var number = String(this.number);
         var fall = String(this.fall);
         var spring = String(this.spring);
         var credits = String(this.credits);
         return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
+    };
+    //implemented this method to just get the id of course, eg CS220
+    Course.prototype.toString = function () {
+        var number = String(this.number);
+        return this.major + number;
     };
     Course.prototype.hasPrereq = function () {
         return this.getPrereq().length != 0;
@@ -42,15 +48,18 @@ var Course = /** @class */ (function () {
 }());
 exports.Course = Course;
 var Node = /** @class */ (function () {
-    function Node(data, Courses_unlocked) {
+    function Node(data, coursesUnlocked) {
         this.data = data;
-        this.Courses_unlocked = Courses_unlocked;
+        this.coursesUnlocked = coursesUnlocked;
     }
     Node.prototype.getCourse = function () {
         return this.data;
     };
     Node.prototype.addAdjacent = function (course) {
-        this.Courses_unlocked.push(course);
+        this.coursesUnlocked.push(course);
+    };
+    Node.prototype.getAdjacent = function () {
+        return this.coursesUnlocked;
     };
     return Node;
 }());
@@ -62,8 +71,50 @@ var Graph = /** @class */ (function () {
         this.courseList = courseList;
         this.addPrereqLinks();
     }
-    Graph.prototype.makeSchedule = function () {
-        return "a finished project! Thank you I'll take the paid internship.";
+    Graph.prototype.topoSort = function () {
+        var _this = this;
+        var finalList = [];
+        var workingList = [];
+        var incomingEdgeDict = new Map();
+        //initalize each node iwth 0 incoming edges.
+        this.courseList.forEach(function (course) { return incomingEdgeDict.set(course.toString(), 0); });
+        //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
+        //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
+        //good rudimentary model ig
+        this.courseList.forEach(function (course) {
+            var _a;
+            (_a = _this.nodeMap.get(course)) === null || _a === void 0 ? void 0 : _a.getAdjacent().forEach(function (courseName) {
+                // Check if the key exists in the incomingEdgeDict
+                var pleaseWork = incomingEdgeDict.get(courseName);
+                incomingEdgeDict.set(courseName, pleaseWork + 1);
+                var num = String(pleaseWork + 1);
+                console.log(courseName + "now has" + num + "edges");
+            });
+        });
+        //add courses with no incoming edges to workingList.
+        this.courseList.forEach(function (course) {
+            if (incomingEdgeDict.get(course) == 0) {
+                workingList.push(course.toString());
+            }
+        });
+        while (workingList.length > 0) {
+            //take the first element of workingList and add it to finalList
+            var course = workingList.shift();
+            if (course) {
+                finalList.push(course);
+                //add all nodes with one remianing prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
+                this.nodeMap.get(course).getAdjacent().forEach(function (courseName) {
+                    if (incomingEdgeDict.get(courseName) == 1) {
+                        workingList.push(courseName);
+                    }
+                    var pleaseWork = incomingEdgeDict.get(courseName);
+                    if (pleaseWork) {
+                        incomingEdgeDict.set(courseName, pleaseWork - 1);
+                    }
+                });
+            }
+        }
+        return finalList;
     };
     Graph.prototype.addPrereqLinks = function () {
         for (var _i = 0, _a = this.courseList; _i < _a.length; _i++) {
