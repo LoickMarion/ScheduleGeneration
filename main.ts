@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import { Course, Node, Graph } from "./course";
+import * as sql from 'mssql';
 
 function readFileSync(filePath: string): string {
   try {
@@ -44,4 +45,41 @@ classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getN
 const a = new Graph<Node<Course>>(nodeMap,classStringList)
 const b = a.getNodeMap();
 
-console.log(b.get("CS240"))
+
+const config = {
+  server: 'jm-lm-schedule.database.windows.net',
+  database: 'jm-lm-schedule',
+  authentication: {
+      type: 'azure-active-directory-msi-app-service',
+      options: {
+          resource: 'https://database.windows.net/'
+      }
+  },
+  options: {
+      encrypt: true
+  }
+};
+
+export async function getCoursesData(): Promise<any> {
+  try {
+      const pool: sql.ConnectionPool = await sql.connect(config);
+      const result = await pool.request().query('SELECT * FROM Courses'); // Modify query as needed
+      return result.recordset;
+  } catch (err) {
+      console.error('Database query error:', err);
+      throw err;
+  }
+}
+
+async function fetchCoursesData() {
+  try {
+    const data = await getCoursesData(); // Wait for the asynchronous function to complete
+    console.log('Retrieved Courses:', data); // Log the retrieved data
+  } catch (err) {
+    console.error('Error fetching data:', err);
+  }
+}
+
+fetchCoursesData();
+
+console.log(getCoursesData());

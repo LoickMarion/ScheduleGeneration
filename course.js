@@ -42,15 +42,15 @@ var Course = /** @class */ (function () {
 }());
 exports.Course = Course;
 var Node = /** @class */ (function () {
-    function Node(data, Courses_unlocked) {
+    function Node(data, coursesUnlocked) {
         this.data = data;
-        this.Courses_unlocked = Courses_unlocked;
+        this.coursesUnlocked = coursesUnlocked;
     }
     Node.prototype.getCourse = function () {
         return this.data;
     };
     Node.prototype.addAdjacent = function (course) {
-        this.Courses_unlocked.push(course);
+        this.coursesUnlocked.push(course);
     };
     return Node;
 }());
@@ -62,9 +62,6 @@ var Graph = /** @class */ (function () {
         this.courseList = courseList;
         this.addPrereqLinks();
     }
-    Graph.prototype.makeSchedule = function () {
-        return "a finished project! Thank you I'll take the paid internship.";
-    };
     Graph.prototype.addPrereqLinks = function () {
         for (var _i = 0, _a = this.courseList; _i < _a.length; _i++) {
             var course = _a[_i];
