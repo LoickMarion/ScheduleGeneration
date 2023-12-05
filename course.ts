@@ -93,6 +93,7 @@ export class Graph<T>{
     this.addPrereqLinks();
     this.sortedClasses = this.topoSort();
   }
+
   topoSort(){
     let finalList: string[] = []
     let workingList: string[] = []
@@ -140,10 +141,8 @@ export class Graph<T>{
       }
     }
     return finalList;
-
-    
-    
 }
+
   addPrereqLinks(){
     for (const course of this.courseList) {
       const node = this.nodeMap.get(course);
