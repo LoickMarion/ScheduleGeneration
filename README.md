@@ -74,3 +74,9 @@ others include furthering our understanding of SQL & Azure, and how to connect i
 that there is not that much more work to do, as James will start to focus on some front-end & server development, while Loick
 looks into fleshing out the back-end code. We both will collaborate on both parts together, but we figured we could divide & conquer
 in that area, as it is the least complex part and we both know how to do each part.
+
+12/4 -- 
+Decided to stop focusing on Azure as it had a high barrier of entry, and instead are going to look into something smaller and simpler
+like SQLite. Was able to finish the graph algo, used a topo sort. Now focusing ahead onto working with the database, front-end website,
+and smaller issues. We plan to work small and transition to big, i.e focus on just the CS major and once that works we can expand
+further.

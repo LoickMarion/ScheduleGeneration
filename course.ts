@@ -80,8 +80,6 @@ export class Graph<T>{
   private nodeMap: Map<string,Node<T>>;
   private courseList: string[]
 
-  
-
   constructor(nodeMap: Map<string,Node<T>>, courseList: string[]){
     //this.node_list = node_list;
     this.nodeMap = nodeMap;
@@ -89,6 +87,7 @@ export class Graph<T>{
 
     this.addPrereqLinks()
   }
+
   topoSort(){
     let finalList: string[] = []
     let workingList: string[] = []
@@ -136,10 +135,8 @@ export class Graph<T>{
       }
     }
     return finalList;
-
-    
-    
 }
+
   addPrereqLinks(){
     for (const course of this.courseList) {
       const node = this.nodeMap.get(course);
