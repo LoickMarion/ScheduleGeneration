@@ -41,10 +41,11 @@ classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getN
 //classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
 
 
-const a = new Graph<Node<Course>>(nodeMap,classStringList)
+const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
 const b = a.getNodeMap();
 const c = a.topoSort();
+const d = a.makeSchedule()
 //console.log(b.get("CS240"));
-console.log(c);
+console.log(d);
 
 

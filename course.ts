@@ -78,16 +78,20 @@ export class Node<T>{
 export class Graph<T>{
   //private node_list: Node<T>[];
   private nodeMap: Map<string,Node<T>>;
-  private courseList: string[]
+  private courseList: string[];
+  private creditLimit: number;
+  private sortedClasses: string[];
 
   
 
-  constructor(nodeMap: Map<string,Node<T>>, courseList: string[]){
+  constructor(nodeMap: Map<string,Node<T>>, courseList: string[], creditLimit: number){
     //this.node_list = node_list;
     this.nodeMap = nodeMap;
     this.courseList = courseList;
+    this.creditLimit = creditLimit;
 
-    this.addPrereqLinks()
+    this.addPrereqLinks();
+    this.sortedClasses = this.topoSort();
   }
   topoSort(){
     let finalList: string[] = []
@@ -100,7 +104,7 @@ export class Graph<T>{
     //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
     //good rudimentary model ig
     this.courseList.forEach((course) => {
-      this.nodeMap.get(course)?.getAdjacent().forEach((courseName) => {
+      this.nodeMap.get(course)!.getAdjacent().forEach((courseName) => {
           // Check if the key exists in the incomingEdgeDict
           let pleaseWork = incomingEdgeDict.get(courseName)!
 
@@ -161,5 +165,42 @@ export class Graph<T>{
 
   getNodeMap(){
     return this.nodeMap;
+  }
+  
+  enoughSpace(course: string, creditsInSem: number){
+    return this.nodeMap.get(course)!.getCourse().getCredits() + creditsInSem <= this.creditLimit
+  }
+
+  prereqsSatisfied(course: string, coursesTaken: string[]){
+    let coursePrereqs: string[] = this.nodeMap.get(course)!.getCourse().getPrereq();
+    if(coursePrereqs.length === 0){
+      return true;
+    }
+    return coursePrereqs.every((curr) => coursePrereqs.includes(curr));
+  }
+  makeSchedule(){
+    const schedule: string[][] = []
+    const classesToAdd = this.sortedClasses;
+    const coursesTaken: string[] = []
+
+    while (classesToAdd.length > 0){
+      let creditsInSem = 0;
+      let coursesInSem: string[] = []
+      let i = 0
+      while(i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)){
+        if(this.enoughSpace(classesToAdd[0],creditsInSem)){
+          creditsInSem += this.nodeMap.get(classesToAdd[i])!.getCourse().getCredits();
+          coursesInSem.push(classesToAdd[i]);
+          console.log("adding course " + classesToAdd[i])
+          
+          classesToAdd.splice(i,1);
+          i--;
+        }
+        coursesInSem.forEach((course)=>coursesTaken.push(course))
+        i++;
+      }
+      schedule.push(coursesInSem);
+    }
+    return schedule;
   }
 }

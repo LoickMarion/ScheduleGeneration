@@ -34,8 +34,9 @@ classList.forEach(function (Course) { return nodeMap.set(Course.getMajor() + Cou
 var classStringList = [];
 classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
 //classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
-var a = new course_1.Graph(nodeMap, classStringList);
+var a = new course_1.Graph(nodeMap, classStringList, 16);
 var b = a.getNodeMap();
 var c = a.topoSort();
+var d = a.makeSchedule();
 //console.log(b.get("CS240"));
-console.log(c);
+console.log(d);

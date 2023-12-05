@@ -65,11 +65,13 @@ var Node = /** @class */ (function () {
 }());
 exports.Node = Node;
 var Graph = /** @class */ (function () {
-    function Graph(nodeMap, courseList) {
+    function Graph(nodeMap, courseList, creditLimit) {
         //this.node_list = node_list;
         this.nodeMap = nodeMap;
         this.courseList = courseList;
+        this.creditLimit = creditLimit;
         this.addPrereqLinks();
+        this.sortedClasses = this.topoSort();
     }
     Graph.prototype.topoSort = function () {
         var _this = this;
@@ -82,13 +84,12 @@ var Graph = /** @class */ (function () {
         //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
         //good rudimentary model ig
         this.courseList.forEach(function (course) {
-            var _a;
-            (_a = _this.nodeMap.get(course)) === null || _a === void 0 ? void 0 : _a.getAdjacent().forEach(function (courseName) {
+            _this.nodeMap.get(course).getAdjacent().forEach(function (courseName) {
                 // Check if the key exists in the incomingEdgeDict
                 var pleaseWork = incomingEdgeDict.get(courseName);
                 incomingEdgeDict.set(courseName, pleaseWork + 1);
                 var num = String(pleaseWork + 1);
-                console.log(courseName + "now has" + num + "edges");
+                //console.log(courseName + "now has" + num + "edges")
             });
         });
         //add courses with no incoming edges to workingList.
@@ -108,9 +109,7 @@ var Graph = /** @class */ (function () {
                         workingList.push(courseName);
                     }
                     var pleaseWork = incomingEdgeDict.get(courseName);
-                    if (pleaseWork) {
-                        incomingEdgeDict.set(courseName, pleaseWork - 1);
-                    }
+                    incomingEdgeDict.set(courseName, pleaseWork - 1);
                 });
             }
         }
@@ -135,6 +134,39 @@ var Graph = /** @class */ (function () {
     };
     Graph.prototype.getNodeMap = function () {
         return this.nodeMap;
+    };
+    Graph.prototype.enoughSpace = function (course, creditsInSem) {
+        return this.nodeMap.get(course).getCourse().getCredits() + creditsInSem <= this.creditLimit;
+    };
+    Graph.prototype.prereqsSatisfied = function (course, coursesTaken) {
+        var coursePrereqs = this.nodeMap.get(course).getCourse().getPrereq();
+        if (coursePrereqs.length === 0) {
+            return true;
+        }
+        return coursePrereqs.every(function (curr) { return coursePrereqs.includes(curr); });
+    };
+    Graph.prototype.makeSchedule = function () {
+        var schedule = [];
+        var classesToAdd = this.sortedClasses;
+        var coursesTaken = [];
+        while (classesToAdd.length > 0) {
+            var creditsInSem = 0;
+            var coursesInSem = [];
+            var i = 0;
+            while (i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)) {
+                if (this.enoughSpace(classesToAdd[0], creditsInSem)) {
+                    creditsInSem += this.nodeMap.get(classesToAdd[i]).getCourse().getCredits();
+                    coursesInSem.push(classesToAdd[i]);
+                    console.log("adding course " + classesToAdd[i]);
+                    classesToAdd.splice(i, 1);
+                    i--;
+                }
+                coursesInSem.forEach(function (course) { return coursesTaken.push(course); });
+                i++;
+            }
+            schedule.push(coursesInSem);
+        }
+        return schedule;
     };
     return Graph;
 }());
