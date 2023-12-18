@@ -140,10 +140,12 @@ var Graph = /** @class */ (function () {
     };
     Graph.prototype.prereqsSatisfied = function (course, coursesTaken) {
         var coursePrereqs = this.nodeMap.get(course).getCourse().getPrereq();
+        console.log(coursePrereqs);
         if (coursePrereqs.length === 0) {
             return true;
         }
-        return coursePrereqs.every(function (curr) { return coursePrereqs.includes(curr); });
+        //if(!this.nodeMap.get(course)!.hasPrereq()){ return true; } 
+        return coursePrereqs.every(function (curr) { return coursesTaken.includes(curr); });
     };
     Graph.prototype.makeSchedule = function () {
         var schedule = [];
@@ -154,16 +156,17 @@ var Graph = /** @class */ (function () {
             var coursesInSem = [];
             var i = 0;
             while (i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)) {
+                console.log("adding class: " + classesToAdd[i] + '\n' + "courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n' + '\n' + '\n');
                 if (this.enoughSpace(classesToAdd[0], creditsInSem)) {
                     creditsInSem += this.nodeMap.get(classesToAdd[i]).getCourse().getCredits();
                     coursesInSem.push(classesToAdd[i]);
-                    console.log("adding course " + classesToAdd[i]);
                     classesToAdd.splice(i, 1);
                     i--;
                 }
-                coursesInSem.forEach(function (course) { return coursesTaken.push(course); });
+                //coursesInSem.forEach((course)=>coursesTaken.push(course))
                 i++;
             }
+            coursesInSem.forEach(function (course) { return coursesTaken.push(course); });
             schedule.push(coursesInSem);
         }
         return schedule;

@@ -17,7 +17,9 @@ function data_to_course_map_parser(data: String){
 
   for(let i = 0; i < textByLine.length; i++){
     let [major,number,prereq_string,fall,spring,credits] = textByLine[i].split(',');
-    let prereqs = prereq_string.split('&&')
+    
+    //let prereqs = prereq_string.split('&&')
+    let prereqs = prereq_string === undefined || prereq_string === '' ? [] : prereq_string.split('&&')
     const input = new Course(major,Number(number),prereqs, stringToBool(fall), stringToBool(spring),Number(credits));
 
     courseList.push(input)
@@ -44,6 +46,7 @@ classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getN
 const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
 const b = a.getNodeMap();
 const c = a.topoSort();
+console.log(c)
 const d = a.makeSchedule()
 //console.log(b.get("CS240"));
 console.log(d);

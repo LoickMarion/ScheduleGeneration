@@ -172,10 +172,11 @@ export class Graph<T>{
 
   prereqsSatisfied(course: string, coursesTaken: string[]){
     let coursePrereqs: string[] = this.nodeMap.get(course)!.getCourse().getPrereq();
-    if(coursePrereqs.length === 0){
+    console.log(coursePrereqs)
+    if(coursePrereqs.length === 0 ){
       return true;
     }
-    return coursePrereqs.every((curr) => coursePrereqs.includes(curr));
+    return coursePrereqs.every((curr) => coursesTaken.includes(curr));
   }
   makeSchedule(){
     const schedule: string[][] = []
@@ -187,17 +188,17 @@ export class Graph<T>{
       let coursesInSem: string[] = []
       let i = 0
       while(i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)){
+        console.log("adding class: " + classesToAdd[i] + '\n'+"courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n'+'\n' + '\n')
         if(this.enoughSpace(classesToAdd[0],creditsInSem)){
           creditsInSem += this.nodeMap.get(classesToAdd[i])!.getCourse().getCredits();
           coursesInSem.push(classesToAdd[i]);
-          console.log("adding course " + classesToAdd[i])
           
           classesToAdd.splice(i,1);
           i--;
         }
-        coursesInSem.forEach((course)=>coursesTaken.push(course))
         i++;
       }
+      coursesInSem.forEach((course)=>coursesTaken.push(course))
       schedule.push(coursesInSem);
     }
     return schedule;
