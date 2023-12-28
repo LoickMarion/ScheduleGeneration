@@ -30,16 +30,14 @@ var Course = /** @class */ (function () {
     };
     //this was originallycalled toString
     Course.prototype.getAttributes = function () {
-        var number = String(this.number);
         var fall = String(this.fall);
         var spring = String(this.spring);
         var credits = String(this.credits);
-        return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
+        return this.major + " " + this.number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
     };
     //implemented this method to just get the id of course, eg CS220
     Course.prototype.toString = function () {
-        var number = String(this.number);
-        return this.major + number;
+        return this.major + this.number;
     };
     Course.prototype.hasPrereq = function () {
         return this.getPrereq().length != 0;
@@ -78,7 +76,7 @@ var Graph = /** @class */ (function () {
         var finalList = [];
         var workingList = [];
         var incomingEdgeDict = new Map();
-        //initalize each node iwth 0 incoming edges.
+        //initalize each node with 0 incoming edges.
         this.courseList.forEach(function (course) { return incomingEdgeDict.set(course.toString(), 0); });
         //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
         //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
@@ -144,7 +142,6 @@ var Graph = /** @class */ (function () {
         if (coursePrereqs.length === 0) {
             return true;
         }
-        //if(!this.nodeMap.get(course)!.hasPrereq()){ return true; } 
         return coursePrereqs.every(function (curr) { return coursesTaken.includes(curr); });
     };
     Graph.prototype.makeSchedule = function () {
@@ -163,7 +160,6 @@ var Graph = /** @class */ (function () {
                     classesToAdd.splice(i, 1);
                     i--;
                 }
-                //coursesInSem.forEach((course)=>coursesTaken.push(course))
                 i++;
             }
             coursesInSem.forEach(function (course) { return coursesTaken.push(course); });

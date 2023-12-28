@@ -1,12 +1,12 @@
 export class Course {
     private major: string;
-    private number: number;
+    private number: string;
     private prereqs: string[];
     private fall: boolean;
     private spring: boolean;
     private credits: number;
 
-    constructor(major: string, number: number, prereqs: string[], fall: boolean, spring: boolean, credits: number){
+    constructor(major: string, number: string, prereqs: string[], fall: boolean, spring: boolean, credits: number){
         this.major = major;
         this.number = number;
         this.prereqs = prereqs;
@@ -35,16 +35,14 @@ export class Course {
     }
     //this was originallycalled toString
     getAttributes(){
-      const number = String(this.number);
       const fall = String(this.fall);
       const spring = String(this.spring);
       const credits = String(this.credits);
-      return this.major + " " + number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
+      return this.major + " " + this.number + " " + this.prereqs.toString() + " " + fall + " " + spring + " " + credits;
     }
     //implemented this method to just get the id of course, eg CS220
     toString(){
-      const number = String(this.number);
-      return this.major + number;
+      return this.major + this.number;
     }
 
     hasPrereq(){

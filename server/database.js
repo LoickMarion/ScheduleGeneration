@@ -1,35 +1,24 @@
-const sqlite3 = require('sqlite3').verbose();
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.closeDatabase = exports.fetchDataFromDatabase = void 0;
+var sqlite3_1 = require("sqlite3");
 // Open a connection to the SQLite database
-const db = new sqlite3.Database('courseDatabase.db');
-
+var db = new sqlite3_1.default.Database('courseDatabase.db');
 // Function to retrieve data from the database
 function fetchDataFromDatabase(query) {
-  return new Promise((resolve, reject) => {
-    //const query = 'SELECT * FROM course_table';
-    
-    db.all(query, [], (err, rows) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      
-      resolve(rows);
+    return new Promise(function (resolve, reject) {
+        db.all(query, [], function (err, rows) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            resolve(rows);
+        });
     });
-  });
 }
-
+exports.fetchDataFromDatabase = fetchDataFromDatabase;
 // Close the database connection
 function closeDatabase() {
-  db.close();
+    db.close();
 }
-
-module.exports = {
-  fetchDataFromDatabase,
-  closeDatabase,
-};
-
-test = fetchDataFromDatabase('SELECT * FROM course_table;');
-var a=0;
-test.then(result=> {a +=1});
-console.log(a);
+exports.closeDatabase = closeDatabase;

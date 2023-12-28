@@ -2,23 +2,35 @@
 const sqlite3 = require('sqlite3').verbose();
 const coursesDB = new sqlite3.Database('courseDatabase.db');
 
-
-// Create a table
+//coursesDB.run('DROP TABLE IF EXISTS course_table;');
+//Create a table
 coursesDB.run(`
   CREATE TABLE IF NOT EXISTS course_table (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     major TEXT,
     courseNumber TEXT,
     fall BOOLEAN,
     spring BOOLEAN,
-    credits INTEGER
-  )
+    credits INTEGER,
+    PRIMARY KEY (major, courseNumber)
+  );
 `);
 
-// Insert data
-const insertStatement = coursesDB.prepare(`
-  INSERT INTO course_table (major, courseNumber, fall,spring,credits) VALUES (?, ?, ?, ?, ?)
+coursesDB.run(`
+  CREATE TABLE IF NOT EXISTS prereq_table (
+    course TEXT,
+    prereq TEXT,
+    PRIMARY KEY (course, prereq)
+  );
 `);
+
+// Insert data in course_table
+const insertCourseTable = coursesDB.prepare(`
+  INSERT OR IGNORE INTO course_table (major, courseNumber, fall,spring,credits) VALUES (?, ?, ?, ?, ?);
+`);
+// INSERT data into prereq_table
+const insertPrereqTable = coursesDB.prepare(`
+  INSERT OR IGNORE INTO prereq_table (course,prereq) VALUES (?,?);
+`)
 
 // CS Courses
 const coreClasses = [
@@ -63,7 +75,6 @@ const electives400 = [
 
 const electives500 = [
   ['CS', '501', true, true, 3],
-  ['CS', '508', true, true, 3],
   ['CS', '520', true, true, 3],
   ['CS', '528', true, true, 3],
   ['CS', '532', true, true, 3],
@@ -104,17 +115,116 @@ const nonCS = [
   ['GEN-ED','4',true,true,3]
 ]
 
+const csPrereqs =[
+  ['MATH132','MATH131'],
+  ['MATH233','MATH132'],
+  ['MATH235','MATH132'],
+  ['STATS315','MATH132'],
+  ['CICS160','CICS110'],
+  ['CICS210','CICS160'],
+  ['CS198C','CICS160'],
+  ['CS220','CICS210'],
+  ['CS230','CICS210'],
+  ['CS230','CS198C'],
+  ['CS240','CICS160'],
+  ['CS240','MATH132'],
+  ['CS250','CICS160'],
+  ['CS250','MATH132'],
+  ['CS311','CICS210'],
+  ['CS311','CS250||MATH455'],
+  ['CS320','CS220'],
+  ['CS325','CICS210'],
+  ['CS326','CS220||CS230'],
+  ['CS328','CICS210'],
+  ['CS335','CS220||CS230'],
+  ['CS345','CICS210'],
+  ['CS348','CICS210'],
+  ['CS348','CS240'],
+  ['CS348','CS250||MATH455'],
+  ['CS360','CS230'],
+  ['CS363','CS230'],
+  ['CS365','CS230'],
+  ['CS370','CS240||CS383'],
+  ['CS373','CS210'],
+  ['CS373','MATH235'],
+  ['CS377','CS230'],
+  ['CS383','CS240||STATS315'],
+  ['CS383','CS220||CS230'],
+  ['CS389','CS220||CS230'],
+  ['CS389','CS240||STATS315'],
+  ['CS389','MATH233'],
+  ['CS390R','CS230'],
+  ['CS420','CS320||CS326'],
+  ['CS426','CS320||CS326'],
+  ['CS429','CS320'],
+  ['CS445','CS220||CS230'],
+  ['CS445','CS311'],
+  ['CS445','CS345'],
+  ['CS446','CS240||CS383'],
+  ['CS453','CS230||CS377'],
+  ['CS461','CS326||CS345||CS377||CS453'],
+  ['CS466','CS311'],
+  ['CS485','CS220'],
+  ['CS485','CS240'],
+  ['CS490Q','MATH132'],
+  ['CS490Q','MATH235'],
+  ['CS490Q','CS240||STATS315'],
+  ['CS491G','CS453'],
+  ['CS501','CS311'],
+  ['CS513','CS250'],
+  ['CS513','CS311'],
+  ['CS514','CS240||STATS315'],
+  ['CS514','CS311'],
+  ['CS515','CS240'],
+  ['CS515','CS250'],
+  ['CS520','CS320||CS326'],
+  ['CS524','CS240||STATS315'],
+  ['CS528','CS230'],
+  ['CS528','CS240'],
+  ['CS532','CS377'],
+  ['CS532','CS445'],
+  ['CS535','CS335'],
+  ['CS546','CS320||CS326'],
+  ['CS546','CS383||CS446||CS485'],
+  ['CS550','CICS210'],
+  ['CS550','STATS315'],
+  ['CS560','CS453'],
+  ['CS561','CS360||CS560'],
+  ['CS561','CS453'],
+  ['CS563','CS311||CS383||CS360'],
+  ['CS564','CS230'],
+  ['CS564','CS360||CS365||CS390R||CS466'],
+  ['CS565','CS365||CS377'],
+  ['CS574','CS311'],
+  ['CS574','CS383'],
+  ['CS574','CS373'],
+  ['CS576','CS220'],
+  ['CS576','CS250||CS311'],
+  ['CS576','MATH235'],
+  ['CS578','CS377'],
+  ['CS589','MATH545'],
+  ['CS589','CS240'],
+  ['CS589','STATS515'],
+  ['CS590AB','MATH235'],
+  ['CS590AB','CS240||CS515||PHYSICS281'],
+  ['CS590AE','CS374'],
+  ['CS590X','CS240||STATS315'],
+  ['CS590X','CICS210']
+  ];
 
 
 
-coreClasses.forEach(data => insertStatement.run(...data));
-electives300.forEach(data => insertStatement.run(...data));
-electives400.forEach(data => insertStatement.run(...data));
-electives500.forEach(data => insertStatement.run(...data));
-nonCS.forEach(data => insertStatement.run(...data));
+coreClasses.forEach(data => insertCourseTable.run(...data));
+electives300.forEach(data => insertCourseTable.run(...data));
+electives400.forEach(data => insertCourseTable.run(...data));
+electives500.forEach(data => insertCourseTable.run(...data));
+nonCS.forEach(data => insertCourseTable.run(...data));
+
+csPrereqs.forEach(data => insertPrereqTable.run(...data));
 
 // Finalize the insert statement
-insertStatement.finalize();
+insertCourseTable.finalize();
+insertPrereqTable.finalize();
 
 // Close the database connection
 coursesDB.close();

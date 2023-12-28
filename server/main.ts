@@ -30,19 +30,19 @@ User: Thanks! BTW I'm zuckerberg and want to buy this from you fro $82 billion!!
 
 //get majors to take from website
 //get list of courses to take from majors
-    //get list of major requriements from database?
-    //get list of courses that could satisfy from database?
+//get list of major requriements from database?
+//get list of courses that could satisfy from database?
 //turn that list into a schedule
-function parseCourseJSONtoArr(jsonData: any[]){
+function parseCourseJSONtoArr(jsonData: any[]): string[] {
   const output: any[] = [];
   jsonData.forEach((e) => {
     let major = e.major; let courseNumber = e.courseNumber; let fall = e.fall; let spring = e.spring; let credits = e.credits;
-    output.push([major,courseNumber,fall,spring,credits])
+    output.push([major, courseNumber, fall, spring, credits])
   });
   return output
 }
 
-function parsePrereqJSONtoArr(jsonData: any[]){
+function parsePrereqJSONtoArr(jsonData: any[]): string[] {
   const output: any[] = [];
   jsonData.forEach((e) => {
     let prereq = e.prereq;
@@ -50,68 +50,57 @@ function parsePrereqJSONtoArr(jsonData: any[]){
   });
   return output
 }
-function queryPrereqs(course: string){
-  const query = 'SELECT * FROM prereq_table WHERE course = '+ course +';';
+
+async function queryPrereqs(course: string) {
+  const query = 'SELECT * FROM prereq_table WHERE course = ' + course + ';';
+  const courses = await fetchDataFromDatabase(query);
+  return parsePrereqJSONtoArr(courses)
+}
+
+async function queryCourse(course: string) {
+  const query = 'SELECT * FROM course_table WHERE CONCAT(major,courseNumber) = ' + course + ';';
   const courses = await fetchDataFromDatabase(query);
   return parseCourseJSONtoArr(courses)
 }
 
-function getCoursesToTake(userInput: string[], majors: string[]){
-  const courseList: string[] = []; 
+async function getCoursesToTake(userInput: string[]) {
+  const courseList: string[] = [];
   var coursesToAddFromUser = userInput;
-  while(coursesToAddFromUser.length >0){
+  while (coursesToAddFromUser.length > 0) {
     const course = coursesToAddFromUser[0];
-    if(!courseList.includes(course)){
+    if (!courseList.includes(course)) {
       courseList.push(course)
-      const prereqs = queryPrereqs(course)
-      prereqs.forEach(prereq => coursesToAddFromUser.push(prereq))
+      const prereqs = await queryPrereqs(course);
+      //handles the or in the SQL database
+      prereqs.forEach(prereq => {
+        const orClasses = prereq.split('||');
+        coursesToAddFromUser.push(orClasses[0])
+      });
     }
     coursesToAddFromUser.shift();
   }
-
-  const coursesForMajor = 
+  return courseList;
 }
 
+async function returnSchedule(input: string[]){
 
-function data_to_course_map_parser(data: String){
-  const courseList: Course[] = [];
-  const textByLine = data.split("\n");
-
-  for(let i = 0; i < textByLine.length; i++){
-    let [major,number,prereq_string,fall,spring,credits] = textByLine[i].split(',');
-    //major, num, etc = get next course from closeDatabase
-    // prereqs = searchPrereqTable(course,number)
-
-    //let prereqs = prereq_string.split('&&')
-    let prereqs = prereq_string === undefined || prereq_string === '' ? [] : prereq_string.split('&&')
-    const input = new Course(major,Number(number),prereqs, stringToBool(fall), stringToBool(spring),Number(credits));
-
-    courseList.push(input)
-  }
-  return courseList
-}
-
-
-function stringToBool(s: string): boolean{
-  return (s === "T");
-}
-
-
-
-
-function returnSchedule(){
-  const filePath = './CS_Classes.txt';
-
-  const data = readFileSync(filePath);
-  const classList = data ? data_to_course_map_parser(data): [];
   const classMap = new Map<string,Course>();
   let nodeMap = new Map<string,Node<Course>>();
+  const classesToTake = await getCoursesToTake(input);
+  const classList: Course[] = [];
+  classesToTake.forEach(async (classString)=>{
+    const courseData = await queryCourse(classString);
+    const prereqData = await queryPrereqs(classString);
+    const course = new Course(courseData[0],courseData[1],prereqData,courseData[2] as unknown as boolean,courseData[3] as unknown as boolean, courseData[4] as unknown as number);
+    //Fix ^
+    classList.push(course);
+  })
   classList.forEach((Course) => nodeMap.set(Course.getMajor()+Course.getNumber(),new Node(Course,[])));
   const classStringList: string[] = [];
   classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getNumber()))
-  //classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
-  
-  
+  classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
+
+
   const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
   const b = a.getNodeMap();
   const c = a.topoSort();
@@ -120,3 +109,6 @@ function returnSchedule(){
   //console.log(b.get("CS240"));
   return d
 }
+const test: string[] = ['CS589','CS377'];
+const pleaseowkr = returnSchedule(test);
+console.log(pleaseowkr);
