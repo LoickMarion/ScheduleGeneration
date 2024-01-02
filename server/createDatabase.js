@@ -2,7 +2,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const coursesDB = new sqlite3.Database('courseDatabase.db');
 
-//coursesDB.run('DROP TABLE IF EXISTS course_table;');
+//coursesDB.run('DROP TABLE IF EXISTS prereq_table;');
 //Create a table
 coursesDB.run(`
   CREATE TABLE IF NOT EXISTS course_table (
@@ -12,8 +12,15 @@ coursesDB.run(`
     spring BOOLEAN,
     credits INTEGER,
     PRIMARY KEY (major, courseNumber)
-  );
-`);
+  );`, function(err) {
+    if (err) {
+      console.error(err);
+    } else {
+      // Table creation success
+      console.log('Course table created successfully');
+    }
+  }
+);
 
 coursesDB.run(`
   CREATE TABLE IF NOT EXISTS prereq_table (
@@ -95,6 +102,8 @@ const nonCS = [
   ['MATH', '132', true, true, 4],
   ['MATH', '233', true, true, 4],
   ['MATH', '235', true, true, 3],
+  ['STATS', '315', true, true, 3],
+  ['MATH', '545', true, true, 3],
   ['CICS', '256', true, true, 4],
   ['CHEM', '111', true, true, 4],
   ['CHEM', '121', true, true, 4],
@@ -120,6 +129,7 @@ const csPrereqs =[
   ['MATH233','MATH132'],
   ['MATH235','MATH132'],
   ['STATS315','MATH132'],
+  ['MATH545', 'MATH235'],
   ['CICS160','CICS110'],
   ['CICS210','CICS160'],
   ['CS198C','CICS160'],
@@ -204,7 +214,7 @@ const csPrereqs =[
   ['CS578','CS377'],
   ['CS589','MATH545'],
   ['CS589','CS240'],
-  ['CS589','STATS515'],
+  ['CS589','STATS315'],
   ['CS590AB','MATH235'],
   ['CS590AB','CS240||CS515||PHYSICS281'],
   ['CS590AE','CS374'],

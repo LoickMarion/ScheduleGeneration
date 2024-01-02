@@ -38,38 +38,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var course_1 = require("./course");
 var database_1 = require("./database");
-//Demonstration of usage
-/*
-User: I want to figure out what classes I need to take as a CS Major!
-System: Sure, let me figure out what classes a CS Major needs to take.
-        *Fetch CS Major requirements, store them*
-System: Now that I have the CS Major classes, can you tell me what courses you have already taken?
-User: Sure! *inputs courses already taken*
-System: Thanks! *Puts those into courseMap*. Now, are there any specific electives you want to take at
-        any point on your college career, such as CS589? If not, they will be generated randomly.
-User: Actually yes, I do want to take that course!
-System: Nice! Here, let me add that to your elective list! Any others?
-User: Nope, just that one!
-System: Awesome! *Generates a CS Schedule, with 589 included* Here is your schedule!
-User: Thanks! BTW I'm zuckerberg and want to buy this from you fro $82 billion!!!!!
-*/
-//589? Prereq = 389. <---- add this to target course list
-//389? Prereq = 240.
-//240? Prereq = 210.
-//get majors to take from website
-//get list of courses to take from majors
-//get list of major requriements from database?
-//get list of courses that could satisfy from database?
-//turn that list into a schedule
 function parseCourseJSONtoArr(jsonData) {
     var output = [];
     jsonData.forEach(function (e) {
+        var layer = [];
         var major = e.major;
         var courseNumber = e.courseNumber;
         var fall = e.fall;
         var spring = e.spring;
         var credits = e.credits;
-        output.push([major, courseNumber, fall, spring, credits]);
+        layer.push(major);
+        layer.push(courseNumber);
+        layer.push(fall);
+        layer.push(spring);
+        layer.push(credits);
+        output.push(layer);
     });
     return output;
 }
@@ -87,7 +70,7 @@ function queryPrereqs(course) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = 'SELECT * FROM prereq_table WHERE course = ' + course + ';';
+                    query = "SELECT * FROM prereq_table WHERE course = '" + course + "';";
                     return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
                 case 1:
                     courses = _a.sent();
@@ -102,7 +85,7 @@ function queryCourse(course) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    query = 'SELECT * FROM course_table WHERE CONCAT(major,courseNumber) = ' + course + ';';
+                    query = "SELECT * FROM course_table WHERE major || courseNumber = '" + course + "';";
                     return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
                 case 1:
                     courses = _a.sent();
@@ -144,7 +127,7 @@ function getCoursesToTake(userInput) {
 }
 function returnSchedule(input) {
     return __awaiter(this, void 0, void 0, function () {
-        var classMap, nodeMap, classesToTake, classList, classStringList, a, b, c, d;
+        var classMap, nodeMap, classesToTake, classList, promises, classStringList, a, b, c, d;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -155,31 +138,34 @@ function returnSchedule(input) {
                 case 1:
                     classesToTake = _a.sent();
                     classList = [];
-                    classesToTake.forEach(function (classString) { return __awaiter(_this, void 0, void 0, function () {
+                    promises = classesToTake.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
                         var courseData, prereqData, course;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, queryCourse(classString)];
                                 case 1:
-                                    courseData = _a.sent();
+                                    courseData = (_a.sent())[0];
                                     return [4 /*yield*/, queryPrereqs(classString)];
                                 case 2:
                                     prereqData = _a.sent();
                                     course = new course_1.Course(courseData[0], courseData[1], prereqData, courseData[2], courseData[3], courseData[4]);
-                                    //Fix ^
                                     classList.push(course);
                                     return [2 /*return*/];
                             }
                         });
                     }); });
+                    return [4 /*yield*/, Promise.all(promises)];
+                case 2:
+                    _a.sent();
+                    //console.log(classList);
                     classList.forEach(function (Course) { return nodeMap.set(Course.getMajor() + Course.getNumber(), new course_1.Node(Course, [])); });
                     classStringList = [];
                     classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
                     classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
+                    console.log(classList);
                     a = new course_1.Graph(nodeMap, classStringList, 16);
                     b = a.getNodeMap();
                     c = a.topoSort();
-                    console.log(c);
                     d = a.makeSchedule();
                     //console.log(b.get("CS240"));
                     return [2 /*return*/, d];
@@ -187,6 +173,21 @@ function returnSchedule(input) {
         });
     });
 }
-var test = ['CS589', 'CS377'];
-var pleaseowkr = returnSchedule(test);
-console.log(pleaseowkr);
+function testFunc() {
+    return __awaiter(this, void 0, void 0, function () {
+        var test, pleaseowkr;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    test = ['CS589', 'CS377'];
+                    return [4 /*yield*/, returnSchedule(test)];
+                case 1:
+                    pleaseowkr = _a.sent();
+                    console.log("the schedule is \n");
+                    console.log(pleaseowkr);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+testFunc();

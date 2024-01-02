@@ -1,5 +1,5 @@
-import {sqlite3} from 'sqlite3';
-
+//import {sqlite3} from 'sqlite3';
+const sqlite3 = require('sqlite3');
 // Open a connection to the SQLite database
 const db = new sqlite3.Database('courseDatabase.db');
 
@@ -20,4 +20,3 @@ export function fetchDataFromDatabase(query: string): Promise<any[]> {
 export function closeDatabase(): void {
   db.close();
 }
-
