@@ -94,37 +94,6 @@ function queryCourse(course) {
         });
     });
 }
-function getCoursesToTake(userInput) {
-    return __awaiter(this, void 0, void 0, function () {
-        var courseList, coursesToAddFromUser, course, prereqs;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    courseList = [];
-                    coursesToAddFromUser = userInput;
-                    _a.label = 1;
-                case 1:
-                    if (!(coursesToAddFromUser.length > 0)) return [3 /*break*/, 4];
-                    course = coursesToAddFromUser[0];
-                    if (!!courseList.includes(course)) return [3 /*break*/, 3];
-                    courseList.push(course);
-                    return [4 /*yield*/, queryPrereqs(course)];
-                case 2:
-                    prereqs = _a.sent();
-                    //handles the or in the SQL database
-                    prereqs.forEach(function (prereq) {
-                        var orClasses = prereq.split('||');
-                        coursesToAddFromUser.push(orClasses[0]);
-                    });
-                    _a.label = 3;
-                case 3:
-                    coursesToAddFromUser.shift();
-                    return [3 /*break*/, 1];
-                case 4: return [2 /*return*/, courseList];
-            }
-        });
-    });
-}
 function returnSchedule(input) {
     return __awaiter(this, void 0, void 0, function () {
         var classMap, nodeMap, classesToTake, classList, promises, classStringList, a, b, c, d;
@@ -134,12 +103,12 @@ function returnSchedule(input) {
                 case 0:
                     classMap = new Map();
                     nodeMap = new Map();
-                    return [4 /*yield*/, getCoursesToTake(input)];
+                    return [4 /*yield*/, getCoursesToTake(input, [], [], '')];
                 case 1:
                     classesToTake = _a.sent();
                     classList = [];
                     promises = classesToTake.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
-                        var courseData, prereqData, course;
+                        var courseData, prereqData, test, course;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, queryCourse(classString)];
@@ -148,7 +117,10 @@ function returnSchedule(input) {
                                     return [4 /*yield*/, queryPrereqs(classString)];
                                 case 2:
                                     prereqData = _a.sent();
-                                    course = new course_1.Course(courseData[0], courseData[1], prereqData, courseData[2], courseData[3], courseData[4]);
+                                    test = prereqData.map(function (e) { return e.split('||')[0]; });
+                                    console.log(classString);
+                                    course = new course_1.Course(courseData[0], courseData[1], test, courseData[2], courseData[3], courseData[4]);
+                                    console.log(course);
                                     classList.push(course);
                                     return [2 /*return*/];
                             }
@@ -162,10 +134,11 @@ function returnSchedule(input) {
                     classStringList = [];
                     classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
                     classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
-                    console.log(classList);
                     a = new course_1.Graph(nodeMap, classStringList, 16);
                     b = a.getNodeMap();
                     c = a.topoSort();
+                    console.log(c);
+                    console.log('Generating Schedule');
                     d = a.makeSchedule();
                     //console.log(b.get("CS240"));
                     return [2 /*return*/, d];
@@ -179,7 +152,7 @@ function testFunc() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    test = ['CS589', 'CS377'];
+                    test = ['CS574', 'CS590AE', 'CS590X'];
                     return [4 /*yield*/, returnSchedule(test)];
                 case 1:
                     pleaseowkr = _a.sent();
@@ -187,6 +160,55 @@ function testFunc() {
                     console.log(pleaseowkr);
                     return [2 /*return*/];
             }
+        });
+    });
+}
+//try and save courses by prioritizing ones we know we will take to be smart
+//for example, courses double counted towards multiple majors/minors
+//for example, explicitly required courses
+//then try every combination of remaining courses for 'or prereqs' and randomly pick ones for electives and then grade based on criteria
+function getCoursesHelper(courseList, coursesToAdd, electivesChosen) {
+    return __awaiter(this, void 0, void 0, function () {
+        var course, prereqs;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!(coursesToAdd.length > 0)) return [3 /*break*/, 3];
+                    course = coursesToAdd[0];
+                    if (!!courseList.includes(course)) return [3 /*break*/, 2];
+                    courseList.push(course);
+                    return [4 /*yield*/, queryPrereqs(course)];
+                case 1:
+                    prereqs = _a.sent();
+                    //handles the or in the SQL database
+                    prereqs.forEach(function (prereq) {
+                        var orClasses = prereq.split('||');
+                        coursesToAdd.push(orClasses[0]);
+                    });
+                    _a.label = 2;
+                case 2:
+                    coursesToAdd.shift();
+                    return [3 /*break*/, 0];
+                case 3: return [2 /*return*/, courseList];
+            }
+        });
+    });
+}
+//need the data of what to take from each major
+//required [CIC110, CICS 160, CICS210,...,CS311, CICS305]
+//I.E
+//Electives [300+,300+,300+...400+]
+//Add required courses for each major/minor and primary major IE to coursestoTake array?
+//Add prereqs and Electives to an array to be processed
+//process them
+function getCoursesToTake(userInput, majorList, minorList, criteria) {
+    return __awaiter(this, void 0, void 0, function () {
+        var courseList, coursesToAdd, electivesChosen;
+        return __generator(this, function (_a) {
+            courseList = [];
+            coursesToAdd = userInput;
+            electivesChosen = [];
+            return [2 /*return*/, getCoursesHelper(courseList, coursesToAdd, electivesChosen)];
         });
     });
 }

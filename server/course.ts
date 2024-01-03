@@ -93,8 +93,8 @@ export class Graph<T>{
   }
 
   topoSort(){
-    let finalList: string[] = []
-    let workingList: string[] = []
+    let finalList: string[] = [];     //final returned list of sorted classes
+    let workingList: string[] = []    //tsc
     let incomingEdgeDict = new Map<string,number>();
     //initalize each node with 0 incoming edges.
     this.courseList.forEach((course) => incomingEdgeDict.set(course.toString(),0))
@@ -105,8 +105,9 @@ export class Graph<T>{
     this.courseList.forEach((course) => {
       this.nodeMap.get(course)!.getAdjacent().forEach((courseName) => {
           // Check if the key exists in the incomingEdgeDict
+          //console.log(courseName)
           let pleaseWork = incomingEdgeDict.get(courseName)!
-
+          
           incomingEdgeDict.set(courseName, pleaseWork + 1);
           let num = String(pleaseWork+1)
           //console.log(courseName + "now has" + num + "edges")
@@ -170,12 +171,19 @@ export class Graph<T>{
 
   prereqsSatisfied(course: string, coursesTaken: string[]){
     let coursePrereqs: string[] = this.nodeMap.get(course)!.getCourse().getPrereq();
-    console.log(coursePrereqs)
     if(coursePrereqs.length === 0 ){
       return true;
     }
-    return coursePrereqs.every((curr) => coursesTaken.includes(curr));
+    return coursePrereqs.every((curr) => {
+     const parsed = curr.split('||');
+     //console.log(parsed);
+     //console.log(coursesTaken);
+     const a = parsed.some((e) => coursesTaken.includes(e))
+     //console.log(a)
+     return a;
+    });
   }
+  
   makeSchedule(){
     const schedule: string[][] = []
     const classesToAdd = this.sortedClasses;
@@ -186,7 +194,7 @@ export class Graph<T>{
       let coursesInSem: string[] = []
       let i = 0
       while(i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)){
-        console.log("adding class: " + classesToAdd[i] + '\n'+"courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n'+'\n' + '\n')
+        //console.log("adding class: " + classesToAdd[i] + '\n'+"courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n'+'\n' + '\n')
         if(this.enoughSpace(classesToAdd[0],creditsInSem)){
           creditsInSem += this.nodeMap.get(classesToAdd[i])!.getCourse().getCredits();
           coursesInSem.push(classesToAdd[i]);

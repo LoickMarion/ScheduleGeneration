@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const coursesDB = new sqlite3.Database('courseDatabase.db');
 
 //coursesDB.run('DROP TABLE IF EXISTS prereq_table;');
+//coursesDB.run('DROP TABLE IF EXISTS course_table;');
 //Create a table
 coursesDB.run(`
   CREATE TABLE IF NOT EXISTS course_table (
@@ -94,7 +95,8 @@ const electives500 = [
   ['CS', '574', true, true, 3],
   ['CS', '589', true, true, 3],
   ['CS', '590AB', true, true, 3],
-  ['CS', '590AE', true, true, 3]
+  ['CS', '590AE', true, true, 3],
+  ['CS', '590X', true, true, 3]
 ];
 
 const nonCS = [
@@ -155,7 +157,7 @@ const csPrereqs =[
   ['CS363','CS230'],
   ['CS365','CS230'],
   ['CS370','CS240||CS383'],
-  ['CS373','CS210'],
+  ['CS373','CICS210'],
   ['CS373','MATH235'],
   ['CS377','CS230'],
   ['CS383','CS240||STATS315'],
@@ -217,12 +219,15 @@ const csPrereqs =[
   ['CS589','STATS315'],
   ['CS590AB','MATH235'],
   ['CS590AB','CS240||CS515||PHYSICS281'],
-  ['CS590AE','CS374'],
+  ['CS590AE','CS453'],
   ['CS590X','CS240||STATS315'],
   ['CS590X','CICS210']
   ];
 
-
+  const transformedArray = csPrereqs.map(pair => {
+    const secondElement = pair[1].split('||').map(course => course.trim());
+    return [pair[0], secondElement];
+  });
 
 coreClasses.forEach(data => insertCourseTable.run(...data));
 electives300.forEach(data => insertCourseTable.run(...data));
