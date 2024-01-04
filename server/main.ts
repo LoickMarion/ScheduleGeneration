@@ -1,3 +1,4 @@
+import { getJSDocReadonlyTag } from "typescript";
 import { Course, Node, Graph } from "./course";
 import { fetchDataFromDatabase, closeDatabase } from "./database";
 
@@ -5,7 +6,7 @@ function parseCourseJSONtoArr(jsonData: any[]): string[][] {
   const output: string[][] = [];
   jsonData.forEach((e) => {
     const layer: string[] = [];
-    let major: string = e.major; let courseNumber:string = e.courseNumber; let fall:string = e.fall; let spring:string = e.spring; let credits:string = e.credits;
+    let major: string = e.major; let courseNumber: string = e.courseNumber; let fall: string = e.fall; let spring: string = e.spring; let credits: string = e.credits;
     layer.push(major); layer.push(courseNumber); layer.push(fall); layer.push(spring); layer.push(credits);
     output.push(layer);
   });
@@ -15,10 +16,41 @@ function parseCourseJSONtoArr(jsonData: any[]): string[][] {
 function parsePrereqJSONtoArr(jsonData: any[]): string[] {
   const output: any[] = [];
   jsonData.forEach((e) => {
-    let prereq = e.prereq;
-    output.push(prereq)
+    output.push(e.prereq)
   });
   return output
+}
+
+function parseMajorReqJSONtoArr(jsonData: any[]): string[] {
+  const output: any[] = [];
+  jsonData.forEach((e) => {
+    for(let i =0; i<e.numOfRequirements; i++){
+      output.push(e.requirement)
+    }
+    
+  });
+  return output
+}
+
+function parseCoursesPerReqJSONtoArr(jsonData: any[]): string[] {
+  const output: any[] = []
+  jsonData.forEach((e) => {
+    output.push(e.course)
+  })
+  return output;
+}
+
+
+async function getCoursesPerReq(requirement: string){
+  const query = "SELECT * FROM courses_per_req WHERE requirement = '" + requirement + "';";
+  const courses = await fetchDataFromDatabase(query);
+  return parseCoursesPerReqJSONtoArr(courses)
+}
+
+async function getMajorRequirements(major: string){
+  const query = "SELECT * FROM major_req_table WHERE major = '" + major + "';";
+  const courses = await fetchDataFromDatabase(query);
+  return parseMajorReqJSONtoArr(courses)
 }
 
 async function queryPrereqs(course: string) {
@@ -34,232 +66,74 @@ async function queryCourse(course: string) {
 }
 
 
-
-// async function returnSchedule(input: string[]){
-
-//   const classMap = new Map<string,Course>();
-//   let nodeMap = new Map<string,Node<Course>>();
-//   const classesToTake = await getCoursesToTake(input,[],[],'');
-//   const classList: Course[] = [];
-
-//   const promises = classesToTake.map(async (classString) => {
-//     const courseData = (await queryCourse(classString))[0];
-//     const prereqData = await queryPrereqs(classString);
-//     //changed line below to handle or prereq
-//     const test = prereqData.map((e) => e.split('||')[0]);
-//     console.log(classString);
-//     const course = new Course(
-//       courseData[0],
-//       courseData[1],
-//       test,
-//       courseData[2] as unknown as boolean,
-//       courseData[3] as unknown as boolean,
-//       courseData[4] as unknown as number
-//     );
-//     console.log(course)
-//     classList.push(course);
-//   });
-
-//   await Promise.all(promises);
-  
-//   //console.log(classList);
-
-//   classList.forEach((Course) => nodeMap.set(Course.getMajor()+Course.getNumber(),new Node(Course,[])));
-//   const classStringList: string[] = [];
-//   classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getNumber()))
-//   classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
-
-//   const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
-//   const b = a.getNodeMap();
-//   const c = a.topoSort();
-//   console.log(c)
-//   console.log('Generating Schedule');
-//   const d = a.makeSchedule()
-//   //console.log(b.get("CS240"));
-//   return d
-// }
-
-function wait(ms: number): Promise<void> {
+function wait(ms: number): Promise<void> { //Use for test, can delete at end
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-async function testFunc(){
-  //const test: string[] = ['CS564','CS563','CS590AB'];
-  const test: string[] = ['CS590AB'];
-  let list: string[][] = []
-  let a = await expandUserInputViaPrereqs([],test,[],list);
-  console.log('Waiting for 5 seconds...');
-  await wait(3000); // 5000 milliseconds = 5 seconds
-  console.log('Finished waiting.');
-  let minValue = 1000
-  let minList: string[] = []
-  let maxValue = 0
-  let maxList: string[] = []
-  for( let i=0; i<list.length;i++){
-    if(minValue > list[i].length){
-      minList = list[i]
-      minValue = list[i].length;
-    }
-    else if(maxValue < list[i].length){
-      maxList = list[i]
-      maxValue = list[i].length;
-    }
-  }
-  console.log('the smallest set of courses has ' + minValue + 'courses.\n' +  minList);
-  console.log('the biggest set of courses has ' + maxValue + 'courses.\n' +  maxList);
+async function testFunc() {
+  const test: string[] = ['CS'];
+  const majorReqs = await getMajorRequirements('CS');
+  console.log(majorReqs)
+  const coursesPerReqs = await Promise.all(majorReqs.map(async (e) => await getCoursesPerReq(e)));
+  console.log(coursesPerReqs);
 }
 
-`
-//chat gpt's function
-async function expandUserInputViaPrereqs(courseList, coursesToAdd, electivesChosen, masterList) {
-  while (coursesToAdd.length > 0) {
-    const course = coursesToAdd.shift();
+async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any) {
+
+  while (coursesToAdd.length > 0) {       //continue until no more courses to take
+
     
-    if (!courseList.includes(course)) {
-      courseList.push(course);
-      const prereqs = await queryPrereqs(course);
+    let course = coursesToAdd.shift() //look at the first course we need to add
+    let splitCourse = course!.split('||'); //split the courses so we can check is there is an or
+    let shouldBreak = false;
+    
+    if(splitCourse.length > 1){
+      
+      if(splitCourse.some((e) => (courseList.includes(e) || coursesToAdd.includes(e)))){
+        continue;
+      }
+      else{
+        const promises: Promise<void>[] = [];
+        splitCourse.forEach((course) => {
+          let newCourseList = courseList.slice();
+          let newCoursesToAdd = coursesToAdd.slice();
+          newCoursesToAdd.push(course);
 
-      const promises = prereqs.map(async (prereq) => {
-        const orClasses = prereq.split('||');
-        
-        if (orClasses.length === 1 && !coursesToAdd.includes(orClasses[0])) {
-          coursesToAdd.push(orClasses[0]);
-        } else {
-          let shouldReturn = false;
-
-          for (let i = 0; i < orClasses.length; i++) {
-            if (courseList.includes(orClasses[i]) || coursesToAdd.includes(orClasses[i])) {
-              return; // Prerequisite already satisfied
-            } else if (electivesChosen.includes(orClasses[i])) {
-              coursesToAdd.push(orClasses[i]);
-              return; // Elective chosen as a prerequisite
-            }
-          }
-
-          shouldReturn = true;
-          const subPromises = orClasses.map(async (e) => {
-            const newCourseList = courseList.slice();
-            const newCoursesToAdd = coursesToAdd.slice();
-            const newElectives = electivesChosen.slice();
-            newCoursesToAdd.push(e);
-            newElectives.push(e);
-
-            await expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, newElectives, masterList);
+          const promise = new Promise<void>((resolve, reject) => {
+            expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, masterList)
+              .then(() => {
+                resolve(); // Resolve the promise when expandUserInputViaPrereqs completes
+              })
+              .catch((error) => {
+                reject(error); // Reject the promise if an error occurs
+              });
           });
 
-          await Promise.all(subPromises); // Wait for all recursive calls to complete
-        }
-      });
-
-      await Promise.all(promises); // Wait for all iterations to complete before continuing
-    }
-  }
-
-  masterList.push(courseList);
-}
-
-`
-async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], electivesChosen: string[], masterList: any){
-  
-  while (coursesToAdd.length > 0) {       //continue until no more courses to take
-    
-    const course = coursesToAdd.shift() //look at the first course we need to add
-    
-    //if the course isn't already processed, process it, else remove it from list and continue onto next iteration
-    if (!courseList.includes(course!)) {
-      let shouldReturn = false;
-
-      //add the course to list courses we have process
-      courseList.push(course!)
-
-      //get the prerequisites for a course.
-      const prereqs = await queryPrereqs(course!);
-     
-      //allows so if multiple classes can meet a prereq, every one gets tested.
-      console.log(prereqs)
-      prereqs.forEach(prereq => {
-        //BIG ISSUE> IF OR PREREQ IS FIRST< WONT PROCESS OTHER PREREQS AFTER, MATH 235 GETS IGNORED
-
-
-        //console.log(prereq);
-        //exits forEach if we should return
-        // if(shouldReturn){
-        //   return;
-        // }
-        
-        const orClasses = prereq.split('||');
-        console.log(orClasses)
-
-        if(orClasses.length == 1 && !(coursesToAdd.includes(orClasses[0]))){
-          //if there is only one prereq, add it to list of courses we need to take if it isnt there already and carry on as normal.
-          console.log(orClasses[0])
-          coursesToAdd.push(orClasses[0])
-          return;
-        }
-        else {
-          //check if a possible elective is one we have chosen before. If so, choose it again. and we dont need to take any more courses to fulfil this requirement.
-          for(let i = 0; i<coursesToAdd.length; i++){
-            if(courseList.includes(orClasses[i])||coursesToAdd.includes(orClasses[i])){
-              //continue to next iteration of foreach loop as this prereq is already satisfied.
-              return;
-            }
-            //if it is determined that we intend to use a course as a prerequisite but we haven't taken it yet, we add it to our courseList
-            else if (electivesChosen.includes(orClasses[i])){
-              coursesToAdd.push(orClasses[i]);
-              return;
-            }
-          }   
-            shouldReturn = true;
-            orClasses.forEach(async(e) => {
-
-              let newCourseList = courseList.slice();
-              let newCoursesToAdd = coursesToAdd.slice();
-              let newElectives = electivesChosen.slice();
-              newCoursesToAdd.push(e)
-              newElectives.push(e);
-              
-              await expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, newElectives, masterList);
-            });
-          }
-      });
-      //exits funtion if we should return
-      if(shouldReturn){
+          promises.push(promise);
+        });
+        await Promise.all(promises);
         return;
+        
       }
     }
-    
+    courseList.push(course!)  //add the course to list courses we have process
+
+    const prereqs = await queryPrereqs(course!);     //get the prerequisites for a course.
+
+    prereqs.forEach(prereq => {
+      if (!coursesToAdd.includes(prereq) && !courseList.includes(prereq)) {
+        coursesToAdd.push(prereq);
+
+      }
+    });
   }
   //console.log(courseList)
   masterList.push(courseList);
 }
 
-async function getCoursesHelper(courseList: string[], coursesToAdd: string[], electivesChosen: string[]){
-  
+async function completeSchedule(coursesSelected: string[], majors: string[]){
+  //const majorRequirements = majors.map((major) => getMajorRequirements(major));
 }
-
-
-  //need the data of what to take from each major
-  //required [CIC110, CICS 160, CICS210,...,CS311, CICS305]
-  //I.E
-  //Electives [300+,300+,300+...400+]
-
-  //Add required courses for each major/minor and primary major IE to coursestoTake array?
-
-  //Add prereqs and Electives to an array to be processed
-
-  //process them
-  
-
-async function getCoursesToTake(userInput: string[], majorList: string[], minorList: string[], criteria: string) {
-  const courseList: string[] = [];
-  var coursesToAdd = userInput;
-  const electivesChosen = [];
-  return expandUserInputViaPrereqs(courseList,coursesToAdd, electivesChosen, [])
-  
-}
-
-
-
 testFunc();
