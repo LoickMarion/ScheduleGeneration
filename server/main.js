@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var course_1 = require("./course");
 var database_1 = require("./database");
 function parseCourseJSONtoArr(jsonData) {
     var output = [];
@@ -94,103 +93,186 @@ function queryCourse(course) {
         });
     });
 }
-function returnSchedule(input) {
-    return __awaiter(this, void 0, void 0, function () {
-        var classMap, nodeMap, classesToTake, classList, promises, classStringList, a, b, c, d;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    classMap = new Map();
-                    nodeMap = new Map();
-                    return [4 /*yield*/, getCoursesToTake(input, [], [], '')];
-                case 1:
-                    classesToTake = _a.sent();
-                    classList = [];
-                    promises = classesToTake.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
-                        var courseData, prereqData, test, course;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, queryCourse(classString)];
-                                case 1:
-                                    courseData = (_a.sent())[0];
-                                    return [4 /*yield*/, queryPrereqs(classString)];
-                                case 2:
-                                    prereqData = _a.sent();
-                                    test = prereqData.map(function (e) { return e.split('||')[0]; });
-                                    console.log(classString);
-                                    course = new course_1.Course(courseData[0], courseData[1], test, courseData[2], courseData[3], courseData[4]);
-                                    console.log(course);
-                                    classList.push(course);
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); });
-                    return [4 /*yield*/, Promise.all(promises)];
-                case 2:
-                    _a.sent();
-                    //console.log(classList);
-                    classList.forEach(function (Course) { return nodeMap.set(Course.getMajor() + Course.getNumber(), new course_1.Node(Course, [])); });
-                    classStringList = [];
-                    classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
-                    classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
-                    a = new course_1.Graph(nodeMap, classStringList, 16);
-                    b = a.getNodeMap();
-                    c = a.topoSort();
-                    console.log(c);
-                    console.log('Generating Schedule');
-                    d = a.makeSchedule();
-                    //console.log(b.get("CS240"));
-                    return [2 /*return*/, d];
-            }
-        });
+// async function returnSchedule(input: string[]){
+//   const classMap = new Map<string,Course>();
+//   let nodeMap = new Map<string,Node<Course>>();
+//   const classesToTake = await getCoursesToTake(input,[],[],'');
+//   const classList: Course[] = [];
+//   const promises = classesToTake.map(async (classString) => {
+//     const courseData = (await queryCourse(classString))[0];
+//     const prereqData = await queryPrereqs(classString);
+//     //changed line below to handle or prereq
+//     const test = prereqData.map((e) => e.split('||')[0]);
+//     console.log(classString);
+//     const course = new Course(
+//       courseData[0],
+//       courseData[1],
+//       test,
+//       courseData[2] as unknown as boolean,
+//       courseData[3] as unknown as boolean,
+//       courseData[4] as unknown as number
+//     );
+//     console.log(course)
+//     classList.push(course);
+//   });
+//   await Promise.all(promises);
+//   //console.log(classList);
+//   classList.forEach((Course) => nodeMap.set(Course.getMajor()+Course.getNumber(),new Node(Course,[])));
+//   const classStringList: string[] = [];
+//   classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getNumber()))
+//   classList.forEach((Course) => classMap.set(Course.getMajor()+Course.getNumber(),Course));
+//   const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
+//   const b = a.getNodeMap();
+//   const c = a.topoSort();
+//   console.log(c)
+//   console.log('Generating Schedule');
+//   const d = a.makeSchedule()
+//   //console.log(b.get("CS240"));
+//   return d
+// }
+function wait(ms) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
     });
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var test, pleaseowkr;
+        var test, list, a, minValue, minList, maxValue, maxList, i;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    test = ['CS574', 'CS590AE', 'CS590X'];
-                    return [4 /*yield*/, returnSchedule(test)];
+                    test = ['CS590AB'];
+                    list = [];
+                    return [4 /*yield*/, expandUserInputViaPrereqs([], test, [], list)];
                 case 1:
-                    pleaseowkr = _a.sent();
-                    console.log("the schedule is \n");
-                    console.log(pleaseowkr);
+                    a = _a.sent();
+                    console.log('Waiting for 5 seconds...');
+                    return [4 /*yield*/, wait(3000)];
+                case 2:
+                    _a.sent(); // 5000 milliseconds = 5 seconds
+                    console.log('Finished waiting.');
+                    minValue = 1000;
+                    minList = [];
+                    maxValue = 0;
+                    maxList = [];
+                    for (i = 0; i < list.length; i++) {
+                        if (minValue > list[i].length) {
+                            minList = list[i];
+                            minValue = list[i].length;
+                        }
+                        else if (maxValue < list[i].length) {
+                            maxList = list[i];
+                            maxValue = list[i].length;
+                        }
+                    }
+                    console.log('the smallest set of courses has ' + minValue + 'courses.\n' + minList);
+                    console.log('the biggest set of courses has ' + maxValue + 'courses.\n' + maxList);
                     return [2 /*return*/];
             }
         });
     });
 }
-//try and save courses by prioritizing ones we know we will take to be smart
-//for example, courses double counted towards multiple majors/minors
-//for example, explicitly required courses
-//then try every combination of remaining courses for 'or prereqs' and randomly pick ones for electives and then grade based on criteria
-function getCoursesHelper(courseList, coursesToAdd, electivesChosen) {
+"\n//chat gpt's function\nasync function expandUserInputViaPrereqs(courseList, coursesToAdd, electivesChosen, masterList) {\n  while (coursesToAdd.length > 0) {\n    const course = coursesToAdd.shift();\n    \n    if (!courseList.includes(course)) {\n      courseList.push(course);\n      const prereqs = await queryPrereqs(course);\n\n      const promises = prereqs.map(async (prereq) => {\n        const orClasses = prereq.split('||');\n        \n        if (orClasses.length === 1 && !coursesToAdd.includes(orClasses[0])) {\n          coursesToAdd.push(orClasses[0]);\n        } else {\n          let shouldReturn = false;\n\n          for (let i = 0; i < orClasses.length; i++) {\n            if (courseList.includes(orClasses[i]) || coursesToAdd.includes(orClasses[i])) {\n              return; // Prerequisite already satisfied\n            } else if (electivesChosen.includes(orClasses[i])) {\n              coursesToAdd.push(orClasses[i]);\n              return; // Elective chosen as a prerequisite\n            }\n          }\n\n          shouldReturn = true;\n          const subPromises = orClasses.map(async (e) => {\n            const newCourseList = courseList.slice();\n            const newCoursesToAdd = coursesToAdd.slice();\n            const newElectives = electivesChosen.slice();\n            newCoursesToAdd.push(e);\n            newElectives.push(e);\n\n            await expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, newElectives, masterList);\n          });\n\n          await Promise.all(subPromises); // Wait for all recursive calls to complete\n        }\n      });\n\n      await Promise.all(promises); // Wait for all iterations to complete before continuing\n    }\n  }\n\n  masterList.push(courseList);\n}\n\n";
+function expandUserInputViaPrereqs(courseList, coursesToAdd, electivesChosen, masterList) {
     return __awaiter(this, void 0, void 0, function () {
-        var course, prereqs;
+        var _loop_1, state_1;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!(coursesToAdd.length > 0)) return [3 /*break*/, 3];
-                    course = coursesToAdd[0];
-                    if (!!courseList.includes(course)) return [3 /*break*/, 2];
-                    courseList.push(course);
-                    return [4 /*yield*/, queryPrereqs(course)];
+                    _loop_1 = function () {
+                        var course, shouldReturn_1, prereqs;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    course = coursesToAdd.shift() //look at the first course we need to add
+                                    ;
+                                    if (!!courseList.includes(course)) return [3 /*break*/, 2];
+                                    shouldReturn_1 = false;
+                                    //add the course to list courses we have process
+                                    courseList.push(course);
+                                    return [4 /*yield*/, queryPrereqs(course)];
+                                case 1:
+                                    prereqs = _b.sent();
+                                    //allows so if multiple classes can meet a prereq, every one gets tested.
+                                    console.log(prereqs);
+                                    prereqs.forEach(function (prereq) {
+                                        //console.log(prereq);
+                                        //exits forEach if we should return
+                                        // if(shouldReturn){
+                                        //   return;
+                                        // }
+                                        var orClasses = prereq.split('||');
+                                        console.log(orClasses);
+                                        if (orClasses.length == 1 && !(coursesToAdd.includes(orClasses[0]))) {
+                                            //if there is only one prereq, add it to list of courses we need to take if it isnt there already and carry on as normal.
+                                            console.log(orClasses[0]);
+                                            coursesToAdd.push(orClasses[0]);
+                                            return;
+                                        }
+                                        else {
+                                            //check if a possible elective is one we have chosen before. If so, choose it again. and we dont need to take any more courses to fulfil this requirement.
+                                            for (var i = 0; i < coursesToAdd.length; i++) {
+                                                if (courseList.includes(orClasses[i]) || coursesToAdd.includes(orClasses[i])) {
+                                                    //continue to next iteration of foreach loop as this prereq is already satisfied.
+                                                    return;
+                                                }
+                                                //if it is determined that we intend to use a course as a prerequisite but we haven't taken it yet, we add it to our courseList
+                                                else if (electivesChosen.includes(orClasses[i])) {
+                                                    coursesToAdd.push(orClasses[i]);
+                                                    return;
+                                                }
+                                            }
+                                            shouldReturn_1 = true;
+                                            orClasses.forEach(function (e) { return __awaiter(_this, void 0, void 0, function () {
+                                                var newCourseList, newCoursesToAdd, newElectives;
+                                                return __generator(this, function (_a) {
+                                                    switch (_a.label) {
+                                                        case 0:
+                                                            newCourseList = courseList.slice();
+                                                            newCoursesToAdd = coursesToAdd.slice();
+                                                            newElectives = electivesChosen.slice();
+                                                            newCoursesToAdd.push(e);
+                                                            newElectives.push(e);
+                                                            return [4 /*yield*/, expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, newElectives, masterList)];
+                                                        case 1:
+                                                            _a.sent();
+                                                            return [2 /*return*/];
+                                                    }
+                                                });
+                                            }); });
+                                        }
+                                    });
+                                    //exits funtion if we should return
+                                    if (shouldReturn_1) {
+                                        return [2 /*return*/, { value: void 0 }];
+                                    }
+                                    _b.label = 2;
+                                case 2: return [2 /*return*/];
+                            }
+                        });
+                    };
+                    _a.label = 1;
                 case 1:
-                    prereqs = _a.sent();
-                    //handles the or in the SQL database
-                    prereqs.forEach(function (prereq) {
-                        var orClasses = prereq.split('||');
-                        coursesToAdd.push(orClasses[0]);
-                    });
-                    _a.label = 2;
+                    if (!(coursesToAdd.length > 0)) return [3 /*break*/, 3];
+                    return [5 /*yield**/, _loop_1()];
                 case 2:
-                    coursesToAdd.shift();
-                    return [3 /*break*/, 0];
-                case 3: return [2 /*return*/, courseList];
+                    state_1 = _a.sent();
+                    if (typeof state_1 === "object")
+                        return [2 /*return*/, state_1.value];
+                    return [3 /*break*/, 1];
+                case 3:
+                    //console.log(courseList)
+                    masterList.push(courseList);
+                    return [2 /*return*/];
             }
+        });
+    });
+}
+function getCoursesHelper(courseList, coursesToAdd, electivesChosen) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/];
         });
     });
 }
@@ -208,7 +290,7 @@ function getCoursesToTake(userInput, majorList, minorList, criteria) {
             courseList = [];
             coursesToAdd = userInput;
             electivesChosen = [];
-            return [2 /*return*/, getCoursesHelper(courseList, coursesToAdd, electivesChosen)];
+            return [2 /*return*/, expandUserInputViaPrereqs(courseList, coursesToAdd, electivesChosen, [])];
         });
     });
 }
