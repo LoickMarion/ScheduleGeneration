@@ -221,12 +221,12 @@ const coreClasses = [
   ];
   
   const nonCS = [
-    ['MATH', '131', true, true, 4],
-    ['MATH', '132', true, true, 4],
-    ['MATH', '233', true, true, 4],
-    ['MATH', '235', true, true, 3],
-    ['STATS', '315', true, true, 3],
-    ['MATH', '545', true, true, 3],
+    // ['MATH', '131', true, true, 4],
+    // ['MATH', '132', true, true, 4],
+    // ['MATH', '233', true, true, 4],
+    // ['MATH', '235', true, true, 3],
+    // ['STATS', '315', true, true, 3],
+    // ['MATH', '545', true, true, 3],
     ['CICS', '256', true, true, 4],
     ['CHEM', '111', true, true, 4],
     ['CHEM', '121', true, true, 4],
@@ -248,11 +248,11 @@ const coreClasses = [
   ]
   
   const csPrereqs =[
-    ['MATH132','MATH131'],
-    ['MATH233','MATH132'],
-    ['MATH235','MATH132'],
-    ['STATS315','MATH132'],
-    ['MATH545', 'MATH235'],
+    // ['MATH132','MATH131'],
+    // ['MATH233','MATH132'],
+    // ['MATH235','MATH132'],
+    // ['STATS315','MATH132'],
+    // ['MATH545', 'MATH235'],
     ['CICS160','CICS110'],
     ['CICS210','CICS160'],
     ['CS198C','CICS160'],

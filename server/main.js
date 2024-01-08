@@ -78,6 +78,28 @@ function parseCoursesPerReqJSONtoArr(jsonData) {
     });
     return output;
 }
+function parseReqsPerCourseJSONtoArr(jsonData) {
+    var output = [];
+    jsonData.forEach(function (e) {
+        output.push(e.requirement);
+    });
+    return output;
+}
+function getReqsPerCourse(course) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, courses;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = "SELECT * FROM courses_per_req WHERE course = '" + course + "';";
+                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
+                case 1:
+                    courses = _a.sent();
+                    return [2 /*return*/, parseReqsPerCourseJSONtoArr(courses)];
+            }
+        });
+    });
+}
 function getCoursesPerReq(requirement) {
     return __awaiter(this, void 0, void 0, function () {
         var query, courses;
@@ -145,25 +167,15 @@ function wait(ms) {
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var test, majorReqs, coursesPerReqs;
-        var _this = this;
+        var test, a;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    test = ['CS'];
-                    return [4 /*yield*/, getMajorRequirements('CS')];
+                    test = ['CS', 'MATH'];
+                    return [4 /*yield*/, getReqsPerCourse('CS311')];
                 case 1:
-                    majorReqs = _a.sent();
-                    console.log(majorReqs);
-                    return [4 /*yield*/, Promise.all(majorReqs.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, getCoursesPerReq(e)];
-                                case 1: return [2 /*return*/, _a.sent()];
-                            }
-                        }); }); }))];
-                case 2:
-                    coursesPerReqs = _a.sent();
-                    console.log(coursesPerReqs);
+                    a = _a.sent();
+                    console.log(a);
                     return [2 /*return*/];
             }
         });
@@ -241,8 +253,39 @@ function expandUserInputViaPrereqs(courseList, coursesToAdd, masterList) {
 }
 function completeSchedule(coursesSelected, majors) {
     return __awaiter(this, void 0, void 0, function () {
+        var majorRequirements, coursesPerReq;
+        var _this = this;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, Promise.all(majors.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, getMajorRequirements(e)];
+                            case 1: return [2 /*return*/, _a.sent()];
+                        }
+                    }); }); }))];
+                case 1:
+                    majorRequirements = _a.sent();
+                    return [4 /*yield*/, Promise.all(majorRequirements.map(function (major) { return __awaiter(_this, void 0, void 0, function () {
+                            var courses;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, Promise.all(major.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0: return [4 /*yield*/, getCoursesPerReq(e)];
+                                                case 1: return [2 /*return*/, _a.sent()];
+                                            }
+                                        }); }); }))];
+                                    case 1:
+                                        courses = _a.sent();
+                                        return [2 /*return*/, courses];
+                                }
+                            });
+                        }); }))];
+                case 2:
+                    coursesPerReq = _a.sent();
+                    return [2 /*return*/, coursesPerReq];
+            }
         });
     });
 }

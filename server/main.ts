@@ -39,7 +39,19 @@ function parseCoursesPerReqJSONtoArr(jsonData: any[]): string[] {
   })
   return output;
 }
+function parseReqsPerCourseJSONtoArr(jsonData: any[]):string[]{
+  const output: any[] = []
+  jsonData.forEach((e) => {
+    output.push(e.requirement)
+  })
+  return output;
+}
 
+async function getReqsPerCourse(course: string){
+  const query = "SELECT * FROM courses_per_req WHERE course = '" + course + "';";
+  const courses = await fetchDataFromDatabase(query);
+  return parseReqsPerCourseJSONtoArr(courses)
+}
 
 async function getCoursesPerReq(requirement: string){
   const query = "SELECT * FROM courses_per_req WHERE requirement = '" + requirement + "';";
@@ -73,11 +85,14 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
 }
 
 async function testFunc() {
-  const test: string[] = ['CS'];
-  const majorReqs = await getMajorRequirements('CS');
-  console.log(majorReqs)
-  const coursesPerReqs = await Promise.all(majorReqs.map(async (e) => await getCoursesPerReq(e)));
-  console.log(coursesPerReqs);
+  const test: string[] = ['CS','MATH'];
+  // const majorReqs = await getMajorRequirements('MATH');
+  // console.log(majorReqs)
+  // const coursesPerReqs = await Promise.all(majorReqs.map(async (e) => await getCoursesPerReq(e)));
+  // console.log(coursesPerReqs);
+  //let a = await completeSchedule([],test);
+  let a = await getReqsPerCourse('CS311');
+  console.log(a);
 }
 
 async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any) {
@@ -134,6 +149,13 @@ async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: str
 }
 
 async function completeSchedule(coursesSelected: string[], majors: string[]){
-  //const majorRequirements = majors.map((major) => getMajorRequirements(major));
+  const majorRequirements = await Promise.all(majors.map(async (e) => await getMajorRequirements(e)));
+  const coursesPerReq = await Promise.all(
+    majorRequirements.map(async (major) => {
+      const courses = await Promise.all(major.map(async (e) => await getCoursesPerReq(e)));
+      return courses;
+    })
+  );
+  return coursesPerReq;
 }
 testFunc();
