@@ -1,81 +1,8 @@
 import { getJSDocReadonlyTag } from "typescript";
 import { Course, Node, Graph } from "./course";
-import { fetchDataFromDatabase, closeDatabase } from "./database";
+import {getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse}  from "./database";
+import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
 
-function parseCourseJSONtoArr(jsonData: any[]): string[][] {
-  const output: string[][] = [];
-  jsonData.forEach((e) => {
-    const layer: string[] = [];
-    let major: string = e.major; let courseNumber: string = e.courseNumber; let fall: string = e.fall; let spring: string = e.spring; let credits: string = e.credits;
-    layer.push(major); layer.push(courseNumber); layer.push(fall); layer.push(spring); layer.push(credits);
-    output.push(layer);
-  });
-  return output
-}
-
-function parsePrereqJSONtoArr(jsonData: any[]): string[] {
-  const output: any[] = [];
-  jsonData.forEach((e) => {
-    output.push(e.prereq)
-  });
-  return output
-}
-
-function parseMajorReqJSONtoArr(jsonData: any[]): string[] {
-  const output: any[] = [];
-  jsonData.forEach((e) => {
-    for(let i =0; i<e.numOfRequirements; i++){
-      output.push(e.requirement)
-    }
-    
-  });
-  return output
-}
-
-function parseCoursesPerReqJSONtoArr(jsonData: any[]): string[] {
-  const output: any[] = []
-  jsonData.forEach((e) => {
-    output.push(e.course)
-  })
-  return output;
-}
-function parseReqsPerCourseJSONtoArr(jsonData: any[]):string[]{
-  const output: any[] = []
-  jsonData.forEach((e) => {
-    output.push(e.requirement)
-  })
-  return output;
-}
-
-async function getReqsPerCourse(course: string){
-  const query = "SELECT * FROM courses_per_req WHERE course = '" + course + "';";
-  const courses = await fetchDataFromDatabase(query);
-  return parseReqsPerCourseJSONtoArr(courses)
-}
-
-async function getCoursesPerReq(requirement: string){
-  const query = "SELECT * FROM courses_per_req WHERE requirement = '" + requirement + "';";
-  const courses = await fetchDataFromDatabase(query);
-  return parseCoursesPerReqJSONtoArr(courses)
-}
-
-async function getMajorRequirements(major: string){
-  const query = "SELECT * FROM major_req_table WHERE major = '" + major + "';";
-  const courses = await fetchDataFromDatabase(query);
-  return parseMajorReqJSONtoArr(courses)
-}
-
-async function queryPrereqs(course: string) {
-  const query = "SELECT * FROM prereq_table WHERE course = '" + course + "';";
-  const courses = await fetchDataFromDatabase(query);
-  return parsePrereqJSONtoArr(courses)
-}
-
-async function queryCourse(course: string) {
-  const query = "SELECT * FROM course_table WHERE major || courseNumber = '" + course + "';";
-  const courses = await fetchDataFromDatabase(query);
-  return parseCourseJSONtoArr(courses)
-}
 
 
 function wait(ms: number): Promise<void> { //Use for test, can delete at end
@@ -90,9 +17,8 @@ async function testFunc() {
   // console.log(majorReqs)
   // const coursesPerReqs = await Promise.all(majorReqs.map(async (e) => await getCoursesPerReq(e)));
   // console.log(coursesPerReqs);
-  //let a = await completeSchedule([],test);
-  let a = await getReqsPerCourse('CS311');
-  console.log(a);
+  let a = await completeSchedule(['CS589', 'CS383', 'MATH545'],test);
+  //console.log(a);
 }
 
 async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any) {
@@ -148,14 +74,79 @@ async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: str
   masterList.push(courseList);
 }
 
-async function completeSchedule(coursesSelected: string[], majors: string[]){
+async function completeSchedule(coursesSelectedInput: string[], majors: string[]){
+
+  const coursesToTake: string[] = [];
+  const coursesSelected = coursesSelectedInput.slice();
+  //array of REQUIRED courses per major
   const majorRequirements = await Promise.all(majors.map(async (e) => await getMajorRequirements(e)));
-  const coursesPerReq = await Promise.all(
-    majorRequirements.map(async (major) => {
-      const courses = await Promise.all(major.map(async (e) => await getCoursesPerReq(e)));
-      return courses;
+  const specific = majorRequirements.map((e) => e[0])
+  const general = majorRequirements.map((e) => e[1])
+
+  let majorMap = new Map<string,number>(); //keep track of which majors a course has been counted for so you dont reuse a course for a specific and electivem e.g. 545 counting for a math elective after being explicitly reuired
+  //loop through specifics. add to courses Selected to test so we can test them for other majors
+  specific.forEach((major)=> {
+    let index = specific.indexOf(major)
+    major.forEach(req => {
+      if(!coursesToTake.includes(req)){
+        coursesToTake.push(req);
+        majorMap.set(req,index)
+      }
+      if(!coursesSelected.includes(req)){
+        coursesSelected.push(req);
+      }
+      
+  })});
+
+  //const nonSpecificMajorRequirements = majorRequirements.filter()  
+
+  console.log(general);
+
+  for(const current in coursesSelected){
+    console.log(coursesSelected[current]);
+    const requirementsSatisfied = await getReqsPerCourse(coursesSelected[current]);
+    console.log(requirementsSatisfied)
+    const filteredReqs = requirementsSatisfied.filter((e) => (general).some((e2)=>e2.includes(e)))
+    console.log(filteredReqs)
+    general.forEach((oneMajor) => {
+      const index = general.indexOf(oneMajor);
+      const bestReq = pickBestReq(oneMajor, requirementsSatisfied,majors[index])
+      console.log(bestReq)
+      if(oneMajor.indexOf(bestReq) >= 0) { 
+        oneMajor.splice(oneMajor.indexOf(bestReq),1);
+        //console.log('removing ' + bestReq + ' from major ' + majors[index] + ' from course ' + coursesSelected[current]);
+      };
+      
     })
-  );
-  return coursesPerReq;
-}
+    //coursesTaken.push(course)
+  }
+  console.log('after\n')
+
+  // loop through courses selected
+  //   finds requirements each class satisfies
+  //     limit it to requirements in the chosen major
+  //     pick the best rquirement (per major) to assign it to
+  // console.log(majorRequirements);
+  
+//   const coursesPerReq = await Promise.all(
+//     majorRequirements.map(async (major) => {
+//       const courses = await Promise.all(major.map(async (e) => await getCoursesPerReq(e)));
+//       return courses;
+//     })
+//   );
+//   return majorRequirements;
+ }
+
 testFunc();
+
+//one major is the requirements remaining for an individual major
+//requirements satisfied are the requirements satisfied by a specific course
+function pickBestReq(oneMajor: string[], requirementsSatisfied: string[], major: string) {
+  const filteredReqs = requirementsSatisfied.filter(e => oneMajor.includes(e))
+  //console.log(filteredReqs)
+  const curMajorPriority: string[] = majorPriorityArrays[major]
+  for(const priority in curMajorPriority){
+    if(filteredReqs.includes(curMajorPriority[priority])){ return curMajorPriority[priority] }
+  }
+  return "None";
+}

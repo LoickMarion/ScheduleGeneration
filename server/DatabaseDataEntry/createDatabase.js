@@ -31,6 +31,7 @@ coursesDB.run(`
     major TEXT,
     requirement TEXT,
     numOfRequirements INTEGER,
+    specific BOOLEAN,
     PRIMARY KEY (major, requirement)
   );
 `);
@@ -56,7 +57,7 @@ insertPrereqTable = coursesDB.prepare(`
 
 // Insert data in major_req_table
 insertMajorReq = coursesDB.prepare(`
-  INSERT OR IGNORE INTO major_req_table (major, requirement,numOfRequirements) VALUES (?, ?, ?);
+  INSERT OR IGNORE INTO major_req_table (major, requirement,numOfRequirements, specific) VALUES (?, ?, ?, ?);
 `);
 // INSERT data into courses_per_req
 insertCoursesPerReq = coursesDB.prepare(`

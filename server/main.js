@@ -37,129 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var database_1 = require("./database");
-function parseCourseJSONtoArr(jsonData) {
-    var output = [];
-    jsonData.forEach(function (e) {
-        var layer = [];
-        var major = e.major;
-        var courseNumber = e.courseNumber;
-        var fall = e.fall;
-        var spring = e.spring;
-        var credits = e.credits;
-        layer.push(major);
-        layer.push(courseNumber);
-        layer.push(fall);
-        layer.push(spring);
-        layer.push(credits);
-        output.push(layer);
-    });
-    return output;
-}
-function parsePrereqJSONtoArr(jsonData) {
-    var output = [];
-    jsonData.forEach(function (e) {
-        output.push(e.prereq);
-    });
-    return output;
-}
-function parseMajorReqJSONtoArr(jsonData) {
-    var output = [];
-    jsonData.forEach(function (e) {
-        for (var i = 0; i < e.numOfRequirements; i++) {
-            output.push(e.requirement);
-        }
-    });
-    return output;
-}
-function parseCoursesPerReqJSONtoArr(jsonData) {
-    var output = [];
-    jsonData.forEach(function (e) {
-        output.push(e.course);
-    });
-    return output;
-}
-function parseReqsPerCourseJSONtoArr(jsonData) {
-    var output = [];
-    jsonData.forEach(function (e) {
-        output.push(e.requirement);
-    });
-    return output;
-}
-function getReqsPerCourse(course) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query, courses;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = "SELECT * FROM courses_per_req WHERE course = '" + course + "';";
-                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
-                case 1:
-                    courses = _a.sent();
-                    return [2 /*return*/, parseReqsPerCourseJSONtoArr(courses)];
-            }
-        });
-    });
-}
-function getCoursesPerReq(requirement) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query, courses;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = "SELECT * FROM courses_per_req WHERE requirement = '" + requirement + "';";
-                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
-                case 1:
-                    courses = _a.sent();
-                    return [2 /*return*/, parseCoursesPerReqJSONtoArr(courses)];
-            }
-        });
-    });
-}
-function getMajorRequirements(major) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query, courses;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = "SELECT * FROM major_req_table WHERE major = '" + major + "';";
-                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
-                case 1:
-                    courses = _a.sent();
-                    return [2 /*return*/, parseMajorReqJSONtoArr(courses)];
-            }
-        });
-    });
-}
-function queryPrereqs(course) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query, courses;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = "SELECT * FROM prereq_table WHERE course = '" + course + "';";
-                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
-                case 1:
-                    courses = _a.sent();
-                    return [2 /*return*/, parsePrereqJSONtoArr(courses)];
-            }
-        });
-    });
-}
-function queryCourse(course) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query, courses;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = "SELECT * FROM course_table WHERE major || courseNumber = '" + course + "';";
-                    return [4 /*yield*/, (0, database_1.fetchDataFromDatabase)(query)];
-                case 1:
-                    courses = _a.sent();
-                    return [2 /*return*/, parseCourseJSONtoArr(courses)];
-            }
-        });
-    });
-}
+var majorPriorityArrays = require("./DatabaseDataEntry/majorPriorityArrays.json");
 function wait(ms) {
     return new Promise(function (resolve) {
         setTimeout(resolve, ms);
@@ -172,10 +50,9 @@ function testFunc() {
             switch (_a.label) {
                 case 0:
                     test = ['CS', 'MATH'];
-                    return [4 /*yield*/, getReqsPerCourse('CS311')];
+                    return [4 /*yield*/, completeSchedule(['CS589', 'CS383', 'MATH545'], test)];
                 case 1:
                     a = _a.sent();
-                    console.log(a);
                     return [2 /*return*/];
             }
         });
@@ -222,7 +99,7 @@ function expandUserInputViaPrereqs(courseList, coursesToAdd, masterList) {
                                     return [2 /*return*/, { value: void 0 }];
                                 case 3:
                                     courseList.push(course); //add the course to list courses we have process
-                                    return [4 /*yield*/, queryPrereqs(course)];
+                                    return [4 /*yield*/, (0, database_1.queryPrereqs)(course)];
                                 case 4:
                                     prereqs = _b.sent();
                                     prereqs.forEach(function (prereq) {
@@ -251,42 +128,100 @@ function expandUserInputViaPrereqs(courseList, coursesToAdd, masterList) {
         });
     });
 }
-function completeSchedule(coursesSelected, majors) {
+function completeSchedule(coursesSelectedInput, majors) {
     return __awaiter(this, void 0, void 0, function () {
-        var majorRequirements, coursesPerReq;
+        var coursesToTake, coursesSelected, majorRequirements, specific, general, _loop_2, _a, _b, _c, _i, current;
         var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, Promise.all(majors.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0: return [4 /*yield*/, getMajorRequirements(e)];
-                            case 1: return [2 /*return*/, _a.sent()];
-                        }
-                    }); }); }))];
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0:
+                    coursesToTake = [];
+                    coursesSelected = coursesSelectedInput.slice();
+                    return [4 /*yield*/, Promise.all(majors.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, (0, database_1.getMajorRequirements)(e)];
+                                case 1: return [2 /*return*/, _a.sent()];
+                            }
+                        }); }); }))];
                 case 1:
-                    majorRequirements = _a.sent();
-                    return [4 /*yield*/, Promise.all(majorRequirements.map(function (major) { return __awaiter(_this, void 0, void 0, function () {
-                            var courses;
-                            var _this = this;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0: return [4 /*yield*/, Promise.all(major.map(function (e) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, getCoursesPerReq(e)];
-                                                case 1: return [2 /*return*/, _a.sent()];
-                                            }
-                                        }); }); }))];
-                                    case 1:
-                                        courses = _a.sent();
-                                        return [2 /*return*/, courses];
-                                }
-                            });
-                        }); }))];
+                    majorRequirements = _d.sent();
+                    specific = majorRequirements.map(function (e) { return e[0]; });
+                    general = majorRequirements.map(function (e) { return e[1]; });
+                    //loop through specifics. add to courses Selected to test so we can test them for other majors
+                    specific.forEach(function (major) {
+                        major.forEach(function (req) {
+                            if (!coursesToTake.includes(req)) {
+                                coursesToTake.push(req);
+                            }
+                            if (!coursesSelected.includes(req)) {
+                                coursesSelected.push(req);
+                            }
+                        });
+                    });
+                    //const nonSpecificMajorRequirements = majorRequirements.filter()  
+                    console.log(general);
+                    _loop_2 = function (current) {
+                        var requirementsSatisfied, filteredReqs;
+                        return __generator(this, function (_e) {
+                            switch (_e.label) {
+                                case 0:
+                                    console.log(coursesSelected[current]);
+                                    return [4 /*yield*/, (0, database_1.getReqsPerCourse)(coursesSelected[current])];
+                                case 1:
+                                    requirementsSatisfied = _e.sent();
+                                    console.log(requirementsSatisfied);
+                                    filteredReqs = requirementsSatisfied.filter(function (e) { return (general).some(function (e2) { return e2.includes(e); }); });
+                                    console.log(filteredReqs);
+                                    general.forEach(function (oneMajor) {
+                                        var index = general.indexOf(oneMajor);
+                                        var bestReq = pickBestReq(oneMajor, requirementsSatisfied, majors[index]);
+                                        console.log(bestReq);
+                                        if (oneMajor.indexOf(bestReq) >= 0) {
+                                            oneMajor.splice(oneMajor.indexOf(bestReq), 1);
+                                            //console.log('removing ' + bestReq + ' from major ' + majors[index] + ' from course ' + coursesSelected[current]);
+                                        }
+                                        ;
+                                    });
+                                    return [2 /*return*/];
+                            }
+                        });
+                    };
+                    _a = coursesSelected;
+                    _b = [];
+                    for (_c in _a)
+                        _b.push(_c);
+                    _i = 0;
+                    _d.label = 2;
                 case 2:
-                    coursesPerReq = _a.sent();
-                    return [2 /*return*/, coursesPerReq];
+                    if (!(_i < _b.length)) return [3 /*break*/, 5];
+                    _c = _b[_i];
+                    if (!(_c in _a)) return [3 /*break*/, 4];
+                    current = _c;
+                    return [5 /*yield**/, _loop_2(current)];
+                case 3:
+                    _d.sent();
+                    _d.label = 4;
+                case 4:
+                    _i++;
+                    return [3 /*break*/, 2];
+                case 5:
+                    console.log('after\n');
+                    return [2 /*return*/];
             }
         });
     });
 }
 testFunc();
+//one major is the requirements remaining for an individual major
+//requirements satisfied are the requirements satisfied by a specific course
+function pickBestReq(oneMajor, requirementsSatisfied, major) {
+    var filteredReqs = requirementsSatisfied.filter(function (e) { return oneMajor.includes(e); });
+    //console.log(filteredReqs)
+    var curMajorPriority = majorPriorityArrays[major];
+    for (var priority in curMajorPriority) {
+        if (filteredReqs.includes(curMajorPriority[priority])) {
+            return curMajorPriority[priority];
+        }
+    }
+    return "None";
+}

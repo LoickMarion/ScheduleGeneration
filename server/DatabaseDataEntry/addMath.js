@@ -3,33 +3,35 @@ const { insertCourseTable, insertMajorReq, insertCoursesPerReq, insertPrereqTabl
 
 //math major requirements (only 1 concentration)
 const math_reqs = [
-    ['MATH','MATH131',1],
-    ['MATH','MATH132',1],
-    ['MATH','MATH233',1],
-    ['MATH','MATH235',1],
-    ['MATH','MATH300',1],
-    ['MATH','PROGRAMMING',1],
-    ['MATH','MATH331',1],
-    ['MATH', 'ADVCALC',1],
-    ['MATH', 'MATH545', 1],
-    ['MATH', 'MATH551', 1],
-    ['MATH', 'MATH_MISC',1],
-    ['MATH', 'MATH_ELECTIVE',2],
-    ['MATH', 'MATH_OUTSIDE_ELECTIVE',1]
+    ['MATH', 'MATH131', 1, true],
+    ['MATH', 'MATH132', 1, true],
+    ['MATH', 'MATH233', 1, true],
+    ['MATH', 'MATH235', 1, true],
+    ['MATH', 'MATH300', 1, false], 
+    ['MATH', 'PROGRAMMING', 1, false],
+    ['MATH', 'MATH331', 1, true],
+    ['MATH', 'ADVCALC', 1, false],
+    ['MATH', 'MATH545', 1, true],
+    ['MATH', 'MATH551', 1, true],
+    ['MATH', 'MATH_MISC', 1, false],
+    ['MATH', 'MATH_ELECTIVE', 2, false], 
+    ['MATH', 'MATH_OUTSIDE_ELECTIVE', 1, false]
 ]
 const programming = [
     ['PROGRAMMING','CICS110'],
     ['PROGRAMMING','PHYSICS281'],
     ['PROGRAMMING','ECE242']
 ]
-const lower_level_reqs = [
+const specifics = [
     ['MATH131','MATH131'],
     ['MATH132','MATH132'],
     ['MATH233', 'MATH233'],
     ['MATH235','MATH235'],
     ['MATH300','MATH300'],
     ['MATH300','CS250'],
-    ['MATH331','MATH331']
+    ['MATH331','MATH331'],
+    ['MATH545','MATH545'],
+    ['MATH551', 'MATH551']
 ]
 
 const advanced_calc = [
@@ -295,7 +297,7 @@ math_reqs.forEach(data =>insertMajorReq.run(...data));
 insertMajorReq.finalize();
 
 programming.forEach(data => insertCoursesPerReq.run(...data));
-lower_level_reqs.forEach(data => insertCoursesPerReq.run(...data));
+specifics.forEach(data => insertCoursesPerReq.run(...data));
 electives.forEach(data => insertCoursesPerReq.run(...data));
 outside_electives.forEach(data => insertCoursesPerReq.run(...data));
 misc.forEach(data => insertCoursesPerReq.run(data));
