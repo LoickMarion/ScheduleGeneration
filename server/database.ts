@@ -21,15 +21,13 @@ export function closeDatabase(): void {
   db.close();
 }
 
-function parseCourseJSONtoArr(jsonData: any[]): string[][] {
-  const output: string[][] = [];
+function parseCourseJSONtoArr(jsonData: any[]): string[] {
+  const layer: string[] = [];
   jsonData.forEach((e) => {
-    const layer: string[] = [];
     let major: string = e.major; let courseNumber: string = e.courseNumber; let fall: string = e.fall; let spring: string = e.spring; let credits: string = e.credits;
     layer.push(major); layer.push(courseNumber); layer.push(fall); layer.push(spring); layer.push(credits);
-    output.push(layer);
   });
-  return output
+  return layer
 }
 
 function parsePrereqJSONtoArr(jsonData: any[]): string[] {
@@ -64,6 +62,25 @@ function parseReqsPerCourseJSONtoArr(jsonData: any[]):string[]{
     output.push(e.requirement)
   })
   return output;
+}
+
+function parseGetMajorsPerCourse(jsonData: any[]): string[]{
+  const output: any[] = []
+  jsonData.forEach((e) => {
+    if(!output.includes(e.major)){    output.push(e.major)    }
+  })
+  return output
+}
+
+export async function getMajorsPerCourse(course: string){
+  const query = "SELECT major FROM courses_per_req WHERE course = '" + course + "';";
+  const majors = await fetchDataFromDatabase(query);
+  return parseGetMajorsPerCourse(majors)
+}
+export async function getOutOfMajorRecs(major: string){
+  const query = "SELECT * FROM major_req_table WHERE major = '" + major + "' AND outOfMajor = true;";
+  const courses = await fetchDataFromDatabase(query);
+  return parseMajorReqJSONtoArr(courses)
 }
 
 export async function getReqsPerCourse(course: string){

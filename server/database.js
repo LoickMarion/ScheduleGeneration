@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryCourse = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = void 0;
+exports.queryCourse = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.getOutOfMajorRecs = exports.getMajorsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = void 0;
 //import {sqlite3} from 'sqlite3';
 var sqlite3 = require('sqlite3');
 // Open a connection to the SQLite database
@@ -60,9 +60,8 @@ function closeDatabase() {
 }
 exports.closeDatabase = closeDatabase;
 function parseCourseJSONtoArr(jsonData) {
-    var output = [];
+    var layer = [];
     jsonData.forEach(function (e) {
-        var layer = [];
         var major = e.major;
         var courseNumber = e.courseNumber;
         var fall = e.fall;
@@ -73,9 +72,8 @@ function parseCourseJSONtoArr(jsonData) {
         layer.push(fall);
         layer.push(spring);
         layer.push(credits);
-        output.push(layer);
     });
-    return output;
+    return layer;
 }
 function parsePrereqJSONtoArr(jsonData) {
     var output = [];
@@ -108,6 +106,47 @@ function parseReqsPerCourseJSONtoArr(jsonData) {
     });
     return output;
 }
+function parseGetMajorsPerCourse(jsonData) {
+    var output = [];
+    jsonData.forEach(function (e) {
+        if (!output.includes(e.major)) {
+            output.push(e.major);
+        }
+    });
+    return output;
+}
+function getMajorsPerCourse(course) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, majors;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = "SELECT major FROM courses_per_req WHERE course = '" + course + "';";
+                    return [4 /*yield*/, fetchDataFromDatabase(query)];
+                case 1:
+                    majors = _a.sent();
+                    return [2 /*return*/, parseGetMajorsPerCourse(majors)];
+            }
+        });
+    });
+}
+exports.getMajorsPerCourse = getMajorsPerCourse;
+function getOutOfMajorRecs(major) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, courses;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = "SELECT * FROM major_req_table WHERE major = '" + major + "' AND outOfMajor = true;";
+                    return [4 /*yield*/, fetchDataFromDatabase(query)];
+                case 1:
+                    courses = _a.sent();
+                    return [2 /*return*/, parseMajorReqJSONtoArr(courses)];
+            }
+        });
+    });
+}
+exports.getOutOfMajorRecs = getOutOfMajorRecs;
 function getReqsPerCourse(course) {
     return __awaiter(this, void 0, void 0, function () {
         var query, courses;
