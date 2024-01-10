@@ -79,16 +79,12 @@ var Graph = /** @class */ (function () {
         //initalize each node with 0 incoming edges.
         this.courseList.forEach(function (course) { return incomingEdgeDict.set(course.toString(), 0); });
         //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
-        //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
-        //good rudimentary model ig
         this.courseList.forEach(function (course) {
             _this.nodeMap.get(course).getAdjacent().forEach(function (courseName) {
                 // Check if the key exists in the incomingEdgeDict
-                //console.log(courseName)
                 var pleaseWork = incomingEdgeDict.get(courseName);
                 incomingEdgeDict.set(courseName, pleaseWork + 1);
                 var num = String(pleaseWork + 1);
-                //console.log(courseName + "now has" + num + "edges")
             });
         });
         //add courses with no incoming edges to workingList.
@@ -153,9 +149,12 @@ var Graph = /** @class */ (function () {
     };
     Graph.prototype.makeSchedule = function () {
         var schedule = [];
-        var classesToAdd = this.sortedClasses;
+        var classesToAdd = this.topoSort();
         var coursesTaken = [];
+        // console.log(classesToAdd);
+        // console.log(coursesTaken);
         while (classesToAdd.length > 0) {
+            console.log(classesToAdd);
             var creditsInSem = 0;
             var coursesInSem = [];
             var i = 0;

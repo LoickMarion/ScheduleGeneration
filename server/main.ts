@@ -1,4 +1,4 @@
-import { getJSDocReadonlyTag } from "typescript";
+ import { getJSDocReadonlyTag } from "typescript";
 import { Course, Node, Graph } from "./course";
 import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorRecs, getMajorsPerCourse, } from "./database";
 import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
@@ -11,9 +11,15 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
 
 async function testFunc() {
   const testMajors: string[] = ['CS', 'MATH'];
-  const testCourses: string[] = ['CS589', 'CS564', 'CS501']
-  generateSchedule(testCourses, testMajors);
-  //scheduleFromCourseList(testCourses)
+  const testCourses: string[] = ['CS589', 'CS564', 'CS390R', 'MATH548']
+  //generateSchedule(testCourses, testMajors);
+  const masterList: string[][] = []
+  await expandUserInputViaPrereqs([],testCourses,masterList);
+  const expandedCourses = masterList[0]
+  const finishedCourses = await completeSchedule(expandedCourses, testMajors)
+  // let testSchedule = await scheduleFromCourseList(finishedCourses)
+  // console.log(testSchedule)
+  return;
   //let a = await completeSchedule([], test);
 
 }
@@ -22,39 +28,30 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
   const classMap = new Map<string, Course>();
   let nodeMap = new Map<string, Node<Course>>();
   const classList: Course[] = [];
-
-//  (classesInSchedule.forEach(async (classString) => {
-//     const courseData = await queryCourse(classString);
-//     const prereqData = await queryPrereqs(classString);
-//     const course = new Course(courseData[0], courseData[1], prereqData, courseData[2] as unknown as boolean, courseData[3] as unknown as boolean, courseData[4] as unknown as number);
-//     classList.push(course);
-//   }))
-
-const classPromises = classesInSchedule.map(async (classString) => {
-  const courseData = await queryCourse(classString);
-  const prereqData = await queryPrereqs(classString);
-  const course = new Course(
-    courseData[0],
-    courseData[1],
-    prereqData,
-    courseData[2] as unknown as boolean,
-    courseData[3] as unknown as boolean,
-    courseData[4] as unknown as number
-  );
-  return course;
-});
-
-Promise.all(classPromises)
-  .then((courses) => {
-    // 'courses' will contain the resolved results of all promises
-    // You can now work with the 'courses' array here
-    classList.push(...courses);
-  })
-  .catch((error) => {
-    // Handle errors here if any of the promises fail
-    console.error(error);
-  });
+  const classPromises = await Promise.all(classesInSchedule.map(async (classString) => {
+    const courseData = await queryCourse(classString);
+    const prereqData = await queryPrereqs(classString);
+    const mappedPrereqs = prereqData.map((prereq) => {
+      let splitPrereq = prereq.split('||');
+      if(splitPrereq.length ==  1){
+        return splitPrereq[0]
+      } else { 
+        return splitPrereq.filter((e) => classesInSchedule.includes(e))[0]
+      }
+    })
   
+    const course = new Course(
+      courseData[0],
+      courseData[1],
+      mappedPrereqs,
+      courseData[2],
+      courseData[3],
+      courseData[4],
+    );
+    classList.push(course)
+    return course;
+  }));
+  // console.log(classPromises)
   classList.forEach((Course) => nodeMap.set(Course.getMajor() + Course.getNumber(), new Node(Course, [])));
   const classStringList: string[] = [];
   classList.forEach((Course) => classStringList.push(Course.getMajor()+Course.getNumber()))
@@ -62,9 +59,10 @@ Promise.all(classPromises)
 
   
   const a = new Graph<Node<Course>>(nodeMap,classStringList,16)
-  a.topoSort();
+  const c = a.topoSort();
+  // console.log(c)
+  // console.log(classList)
   const d = a.makeSchedule()
-  console.log(d)
   return d
 }
 
@@ -127,6 +125,8 @@ async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: str
   }
   masterList.push(courseList);
 }
+
+
 
 async function completeSchedule(coursesSelectedInput: string[], majors: string[]) {
 
@@ -230,7 +230,20 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
     }
     coursesForSchedule.push(bestCourse!);
   }
-  filteredGeneral.forEach(async (major, acc) => {
+
+  const restOfClasses = await randomClassFilling(filteredGeneral,coursesForSchedule,majors, majorMap);
+  console.log(restOfClasses)
+  
+
+  await wait(1000)
+  //console.log(coursesForSchedule)
+  console.log('finished complete schedule')
+  return coursesForSchedule;
+}
+
+async function randomClassFilling(filteredGeneral: string[][],coursesAlreadyTaken:string[], majors: string[], majorMap: Map<string, string[]>){
+  const coursesAdded: string[] = []
+  await Promise.all(filteredGeneral.forEach(async (major, acc) =>  await Promise.all({
     major.forEach(async requirement => {
       //pick random course that meets requirement
       const courses = await getCoursesPerReq(requirement);
@@ -244,25 +257,22 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
         //check if we can take it
         const b = majorMap.get(chosenCourse)
         const chosenCoursePrereqs = await queryPrereqs(chosenCourse)
-        const prereqsSatisfied = chosenCoursePrereqs.every((e) => e.split('||').some((split) => coursesForSchedule.includes(split)))
-        const courseAlreadyTaken = coursesForSchedule.includes(chosenCourse)
+        const prereqsSatisfied = chosenCoursePrereqs.every((e) => e.split('||').some((split) => coursesAlreadyTaken.includes(split)))
+        const courseAlreadyTaken = coursesAlreadyTaken.includes(chosenCourse)
         if (courseAlreadyTaken || !prereqsSatisfied || (b && b.includes(majors[acc]))) {
           continue;
         } else {
-          coursesForSchedule.push(chosenCourse)
+          coursesAdded.push(chosenCourse)
           chosen = true;
         }
 
       }
     })
     acc++;
-  })
-  await wait(1000)
-  //console.log(coursesForSchedule)
-  return coursesForSchedule;
+  }))
+  return coursesAdded;
 }
 
-testFunc();
 
 async function pickBestCourse(filteredOutOfMajor: string[][], majors: string[], majorMap: Map<string, string[]>, coursesForSchedule: string[]) {
 
@@ -309,6 +319,6 @@ function pickBestReq(oneMajor: string[], requirementsSatisfied: string[], major:
   return "None";
 }
 
-function hasProperty(JSON_Object: any, key: keyof any) {
-  return JSON_Object[key] !== undefined;
-}
+
+testFunc();
+console.log('done')

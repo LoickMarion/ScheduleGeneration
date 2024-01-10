@@ -46,57 +46,77 @@ function wait(ms) {
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var testMajors, testCourses;
+        var testMajors, testCourses, masterList, expandedCourses, finishedCourses;
         return __generator(this, function (_a) {
-            testMajors = ['CS', 'MATH'];
-            testCourses = ['CS589', 'CS564', 'CS501'];
-            generateSchedule(testCourses, testMajors);
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    testMajors = ['CS', 'MATH'];
+                    testCourses = ['CS589', 'CS564', 'CS390R', 'MATH548'];
+                    masterList = [];
+                    return [4 /*yield*/, expandUserInputViaPrereqs([], testCourses, masterList)];
+                case 1:
+                    _a.sent();
+                    expandedCourses = masterList[0];
+                    return [4 /*yield*/, completeSchedule(expandedCourses, testMajors)
+                        // let testSchedule = await scheduleFromCourseList(finishedCourses)
+                        // console.log(testSchedule)
+                    ];
+                case 2:
+                    finishedCourses = _a.sent();
+                    // let testSchedule = await scheduleFromCourseList(finishedCourses)
+                    // console.log(testSchedule)
+                    return [2 /*return*/];
+            }
         });
     });
 }
 function scheduleFromCourseList(classesInSchedule) {
     return __awaiter(this, void 0, void 0, function () {
-        var classMap, nodeMap, classList, classPromises, classStringList, a, d;
+        var classMap, nodeMap, classList, classPromises, classStringList, a, c, d;
         var _this = this;
         return __generator(this, function (_a) {
-            classMap = new Map();
-            nodeMap = new Map();
-            classList = [];
-            classPromises = classesInSchedule.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
-                var courseData, prereqData, course;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4 /*yield*/, (0, database_1.queryCourse)(classString)];
-                        case 1:
-                            courseData = _a.sent();
-                            return [4 /*yield*/, (0, database_1.queryPrereqs)(classString)];
-                        case 2:
-                            prereqData = _a.sent();
-                            course = new course_1.Course(courseData[0], courseData[1], prereqData, courseData[2], courseData[3], courseData[4]);
-                            return [2 /*return*/, course];
-                    }
-                });
-            }); });
-            Promise.all(classPromises)
-                .then(function (courses) {
-                // 'courses' will contain the resolved results of all promises
-                // You can now work with the 'courses' array here
-                classList.push.apply(classList, courses);
-            })
-                .catch(function (error) {
-                // Handle errors here if any of the promises fail
-                console.error(error);
-            });
-            classList.forEach(function (Course) { return nodeMap.set(Course.getMajor() + Course.getNumber(), new course_1.Node(Course, [])); });
-            classStringList = [];
-            classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
-            classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
-            a = new course_1.Graph(nodeMap, classStringList, 16);
-            a.topoSort();
-            d = a.makeSchedule();
-            console.log(d);
-            return [2 /*return*/, d];
+            switch (_a.label) {
+                case 0:
+                    classMap = new Map();
+                    nodeMap = new Map();
+                    classList = [];
+                    return [4 /*yield*/, Promise.all(classesInSchedule.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
+                            var courseData, prereqData, mappedPrereqs, course;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, (0, database_1.queryCourse)(classString)];
+                                    case 1:
+                                        courseData = _a.sent();
+                                        return [4 /*yield*/, (0, database_1.queryPrereqs)(classString)];
+                                    case 2:
+                                        prereqData = _a.sent();
+                                        mappedPrereqs = prereqData.map(function (prereq) {
+                                            var splitPrereq = prereq.split('||');
+                                            if (splitPrereq.length == 1) {
+                                                return splitPrereq[0];
+                                            }
+                                            else {
+                                                return splitPrereq.filter(function (e) { return classesInSchedule.includes(e); })[0];
+                                            }
+                                        });
+                                        course = new course_1.Course(courseData[0], courseData[1], mappedPrereqs, courseData[2], courseData[3], courseData[4]);
+                                        classList.push(course);
+                                        return [2 /*return*/, course];
+                                }
+                            });
+                        }); }))];
+                case 1:
+                    classPromises = _a.sent();
+                    // console.log(classPromises)
+                    classList.forEach(function (Course) { return nodeMap.set(Course.getMajor() + Course.getNumber(), new course_1.Node(Course, [])); });
+                    classStringList = [];
+                    classList.forEach(function (Course) { return classStringList.push(Course.getMajor() + Course.getNumber()); });
+                    classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
+                    a = new course_1.Graph(nodeMap, classStringList, 16);
+                    c = a.topoSort();
+                    d = a.makeSchedule();
+                    return [2 /*return*/, d];
+            }
         });
     });
 }
@@ -204,7 +224,7 @@ function expandUserInputViaPrereqs(courseList, coursesToAdd, masterList) {
 }
 function completeSchedule(coursesSelectedInput, majors) {
     return __awaiter(this, void 0, void 0, function () {
-        var coursesForSchedule, coursesLeftToAdd, majorRequirements, specific, general, majorMap, _loop_2, majorIndex, _i, coursesLeftToAdd_1, current, requirementsSatisfied, filteredReqs, majorIndex, major, tempArr, oneMajor, bestReq, outOfMajorRecs, filteredOutOfMajor, filteredGeneral, i, majorIndex, _a, _b, generalClass, bestCourse, requirementsSatisfied, majorIndex, major, oneMajor, bestReq;
+        var coursesForSchedule, coursesLeftToAdd, majorRequirements, specific, general, majorMap, _loop_2, majorIndex, _i, coursesLeftToAdd_1, current, requirementsSatisfied, filteredReqs, majorIndex, major, tempArr, oneMajor, bestReq, outOfMajorRecs, filteredOutOfMajor, filteredGeneral, i, majorIndex, _a, _b, generalClass, bestCourse, requirementsSatisfied, majorIndex, major, oneMajor, bestReq, restOfClasses;
         var _this = this;
         return __generator(this, function (_c) {
             switch (_c.label) {
@@ -323,58 +343,71 @@ function completeSchedule(coursesSelectedInput, majors) {
                     }
                     coursesForSchedule.push(bestCourse);
                     return [3 /*break*/, 7];
-                case 10:
-                    filteredGeneral.forEach(function (major, acc) { return __awaiter(_this, void 0, void 0, function () {
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            major.forEach(function (requirement) { return __awaiter(_this, void 0, void 0, function () {
-                                var courses, chosen, a, chosenCourse, b, chosenCoursePrereqs, prereqsSatisfied, courseAlreadyTaken;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, (0, database_1.getCoursesPerReq)(requirement)];
-                                        case 1:
-                                            courses = _a.sent();
-                                            chosen = false;
-                                            a = Math.floor(Math.random() * courses.length);
-                                            _a.label = 2;
-                                        case 2:
-                                            if (!!chosen) return [3 /*break*/, 4];
-                                            a = (a + 1) % (courses.length - 1);
-                                            chosenCourse = courses[a];
-                                            b = majorMap.get(chosenCourse);
-                                            return [4 /*yield*/, (0, database_1.queryPrereqs)(chosenCourse)];
-                                        case 3:
-                                            chosenCoursePrereqs = _a.sent();
-                                            prereqsSatisfied = chosenCoursePrereqs.every(function (e) { return e.split('||').some(function (split) { return coursesForSchedule.includes(split); }); });
-                                            courseAlreadyTaken = coursesForSchedule.includes(chosenCourse);
-                                            if (courseAlreadyTaken || !prereqsSatisfied || (b && b.includes(majors[acc]))) {
-                                                return [3 /*break*/, 2];
-                                            }
-                                            else {
-                                                coursesForSchedule.push(chosenCourse);
-                                                chosen = true;
-                                            }
-                                            return [3 /*break*/, 2];
-                                        case 4: return [2 /*return*/];
-                                    }
-                                });
-                            }); });
-                            acc++;
-                            return [2 /*return*/];
-                        });
-                    }); });
+                case 10: return [4 /*yield*/, randomClassFilling(filteredGeneral, coursesForSchedule, majors, majorMap)];
+                case 11:
+                    restOfClasses = _c.sent();
+                    console.log(restOfClasses);
                     return [4 /*yield*/, wait(1000)
                         //console.log(coursesForSchedule)
                     ];
-                case 11:
+                case 12:
                     _c.sent();
                     //console.log(coursesForSchedule)
+                    console.log('finished complete schedule');
                     return [2 /*return*/, coursesForSchedule];
             }
         });
     });
 }
-testFunc();
+function randomClassFilling(filteredGeneral, coursesAlreadyTaken, majors, majorMap) {
+    return __awaiter(this, void 0, void 0, function () {
+        var coursesAdded;
+        var _this = this;
+        return __generator(this, function (_a) {
+            coursesAdded = [];
+            filteredGeneral.forEach(function (major, acc) { return __awaiter(_this, void 0, void 0, function () {
+                var _this = this;
+                return __generator(this, function (_a) {
+                    major.forEach(function (requirement) { return __awaiter(_this, void 0, void 0, function () {
+                        var courses, chosen, a, chosenCourse, b, chosenCoursePrereqs, prereqsSatisfied, courseAlreadyTaken;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, (0, database_1.getCoursesPerReq)(requirement)];
+                                case 1:
+                                    courses = _a.sent();
+                                    chosen = false;
+                                    a = Math.floor(Math.random() * courses.length);
+                                    _a.label = 2;
+                                case 2:
+                                    if (!!chosen) return [3 /*break*/, 4];
+                                    a = (a + 1) % (courses.length - 1);
+                                    chosenCourse = courses[a];
+                                    b = majorMap.get(chosenCourse);
+                                    return [4 /*yield*/, (0, database_1.queryPrereqs)(chosenCourse)];
+                                case 3:
+                                    chosenCoursePrereqs = _a.sent();
+                                    prereqsSatisfied = chosenCoursePrereqs.every(function (e) { return e.split('||').some(function (split) { return coursesAlreadyTaken.includes(split); }); });
+                                    courseAlreadyTaken = coursesAlreadyTaken.includes(chosenCourse);
+                                    if (courseAlreadyTaken || !prereqsSatisfied || (b && b.includes(majors[acc]))) {
+                                        return [3 /*break*/, 2];
+                                    }
+                                    else {
+                                        coursesAdded.push(chosenCourse);
+                                        chosen = true;
+                                    }
+                                    return [3 /*break*/, 2];
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    acc++;
+                    return [2 /*return*/];
+                });
+            }); });
+            return [2 /*return*/, coursesAdded];
+        });
+    });
+}
 function pickBestCourse(filteredOutOfMajor, majors, majorMap, coursesForSchedule) {
     return __awaiter(this, void 0, void 0, function () {
         var filteredOutOfMajorReqs, _a, _b, _c, _d, _e, sortedArr, _i, sortedArr_1, possibleCourse, chosenCoursePrereqs, prereqsSatisfied, _f, _g, _h;
@@ -460,6 +493,5 @@ function pickBestReq(oneMajor, requirementsSatisfied, major) {
     }
     return "None";
 }
-function hasProperty(JSON_Object, key) {
-    return JSON_Object[key] !== undefined;
-}
+testFunc();
+console.log('done');

@@ -100,17 +100,16 @@ export class Graph<T>{
     this.courseList.forEach((course) => incomingEdgeDict.set(course.toString(),0))
 
     //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
-    //This wont hold up long term but because wont work if you have to take course A and course B or course C, bc it iwll let you take jsut B and C, but
-    //good rudimentary model ig
+
     this.courseList.forEach((course) => {
       this.nodeMap.get(course)!.getAdjacent().forEach((courseName) => {
           // Check if the key exists in the incomingEdgeDict
-          //console.log(courseName)
+
           let pleaseWork = incomingEdgeDict.get(courseName)!
           
           incomingEdgeDict.set(courseName, pleaseWork + 1);
           let num = String(pleaseWork+1)
-          //console.log(courseName + "now has" + num + "edges")
+
           
       });
     }); 
@@ -186,10 +185,15 @@ export class Graph<T>{
   
   makeSchedule(){
     const schedule: string[][] = []
-    const classesToAdd = this.sortedClasses;
+    const classesToAdd = this.topoSort()
     const coursesTaken: string[] = []
 
+    // console.log(classesToAdd);
+    // console.log(coursesTaken);
+    
     while (classesToAdd.length > 0){
+          console.log(classesToAdd)
+
       let creditsInSem = 0;
       let coursesInSem: string[] = []
       let i = 0

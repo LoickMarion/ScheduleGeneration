@@ -21,10 +21,10 @@ export function closeDatabase(): void {
   db.close();
 }
 
-function parseCourseJSONtoArr(jsonData: any[]): string[] {
-  const layer: string[] = [];
+function parseCourseJSONtoArr(jsonData: any[]): any[] {
+  const layer: any[] = [];
   jsonData.forEach((e) => {
-    let major: string = e.major; let courseNumber: string = e.courseNumber; let fall: string = e.fall; let spring: string = e.spring; let credits: string = e.credits;
+    let major: string = e.major; let courseNumber: string = e.courseNumber; let fall: boolean = e.fall; let spring: boolean = e.spring; let credits: number = e.credits;
     layer.push(major); layer.push(courseNumber); layer.push(fall); layer.push(spring); layer.push(credits);
   });
   return layer
