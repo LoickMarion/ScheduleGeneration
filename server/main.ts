@@ -8,11 +8,21 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
   });
 }
 
+async function getTotalCreditNumber(schedule: string[][]): Promise<number>{
+  let credits = 0;
+  for(const semester of schedule){
+    for(const course of semester){
+      let courseObj = await queryCourse(course);
+      console.log(courseObj);
+    }
+  }
+  return credits;
+}
+
 async function testFunc() {
-  const testMajors: string[] = ['CS'];
+  const testMajors: string[] = ['CS','MATH'];
   const genEDArr: string[] = ['GENED','GENED2'];
   const finalMajorArr = testMajors.concat(genEDArr)
-  console.log(finalMajorArr);
   const testCourses: string[] = ['CS565']
   //generateSchedule(testCourses, testMajors);
   const masterList: string[][] = []
@@ -21,21 +31,18 @@ async function testFunc() {
   masterList.forEach(async list =>  {
     const finishedCourses = await completeSchedule(list, finalMajorArr)
     let testSchedule = await scheduleFromCourseList(finishedCourses)
-  
     schedules.push(testSchedule)
+    console.log(schedules)
   })
-  console.log('at the end')
   console.log(schedules)
   return;
-  //let a = await completeSchedule([], test);
-
 }
 async function scheduleFromCourseList(classesInSchedule: string[]) {
 
   const classMap = new Map<string, Course>();
   let nodeMap = new Map<string, Node<Course>>();
   const classList: Course[] = [];
-  const classPromises = await Promise.all(classesInSchedule.map(async (classString) => {
+  const classPromises = await Promise.all(classesInSchedule.map(async (classString) => { //Idk if we need to assign this to classPromises?
     const courseData = await queryCourse(classString);
     const prereqData = await queryPrereqs(classString);
     const mappedPrereqs = prereqData.map((prereq) => {
@@ -154,6 +161,7 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   for (const majorIndex in specific) {
     let major = majors[majorIndex];
     specific[majorIndex].forEach(req => {
+
       if (!coursesForSchedule.includes(req)) {
         coursesForSchedule.push(req);
         let tempArr = majorMap.get(req)
@@ -177,7 +185,7 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   for (const current of coursesLeftToAdd) {
     const requirementsSatisfied = await getReqsPerCourse(current);
     const filteredReqs = requirementsSatisfied.filter((e) => (general).some((e2) => e2.includes(e)))
-
+    
     for (const majorIndex in general) {
       const major = majors[majorIndex]
 
@@ -206,12 +214,13 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   const outOfMajorRecs = await Promise.all(majors.map(async (e) => (await getOutOfMajorRecs(e))[1]));
   const filteredOutOfMajor: string[][] = []
   const filteredGeneral: string[][] = []
-  // console.log(filteredGeneral)
+  
   // con
   for (let i = 0; i < majors.length; i++) {
     filteredOutOfMajor.push([])
     filteredGeneral.push([])
   }
+
   //sorts remianing requirements based on whether or not it can be satisfied by an out of major course as we need to be smart about which course we pick for those.
   //uses a nested for loop to find each class and then determines if that class is out of major eligible or not. Pushes to corrosponding array
   for (const majorIndex in general) {
@@ -219,6 +228,7 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
       outOfMajorRecs[majorIndex].includes(generalClass) ? filteredOutOfMajor[majorIndex].push(generalClass) : filteredGeneral[majorIndex].push(generalClass)
     }
   }
+
 
   //while reqs left in filteredOutOfMajor
   //do the wonky array + a bit more to find best class to take

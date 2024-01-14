@@ -3,16 +3,16 @@ const { insertCourseTable, insertMajorReq, insertCoursesPerReq, insertPrereqTabl
 
 const gened_reqs = [
     ['GENED', 'ENGLWRIT112', 1, true, false],
-    ['GENED', 'BASIC_MATH', 1, false, true],
-    ['GENED', 'BIOLOGICAL_WORLD', 1, false, true],
-    ['GENED', 'PHYSICAL_WORLD', 1, false, true],
-    ['GENED', 'AT||AL', 1, false, true],
-    ['GENED', 'HS', 1, false, true],
-    ['GENED', 'SB', 1, false, true],
-    ['GENED', 'SW', 1, false, true],
-    ['GENED2', 'ANALYTIC_REASONING', 1, false, true],
-    ['GENED2', 'DG', 1, false, true],
-    ['GENED2', 'DU', 1, false, true]   
+    ['GENED', 'BASIC_MATH', 1, false, false],
+    ['GENED', 'BIOLOGICAL_WORLD', 1, false, false],
+    ['GENED', 'PHYSICAL_WORLD', 1, false, false],
+    ['GENED', 'AT||AL', 1, false, false],
+    ['GENED', 'HS', 1, false, false],
+    ['GENED', 'SB', 1, false, false],
+    ['GENED', 'SW', 1, false, false],
+    ['GENED2', 'ANALYTIC_REASONING', 1, false, false],
+    ['GENED2', 'DG', 1, false, false],
+    ['GENED2', 'DU', 1, false, false]   
 ]
 
 const gened_classes = [

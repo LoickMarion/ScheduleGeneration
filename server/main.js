@@ -44,6 +44,39 @@ function wait(ms) {
         setTimeout(resolve, ms);
     });
 }
+function getTotalCreditNumber(schedule) {
+    return __awaiter(this, void 0, void 0, function () {
+        var credits, _i, schedule_1, semester, _a, semester_1, course, courseObj;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    credits = 0;
+                    _i = 0, schedule_1 = schedule;
+                    _b.label = 1;
+                case 1:
+                    if (!(_i < schedule_1.length)) return [3 /*break*/, 6];
+                    semester = schedule_1[_i];
+                    _a = 0, semester_1 = semester;
+                    _b.label = 2;
+                case 2:
+                    if (!(_a < semester_1.length)) return [3 /*break*/, 5];
+                    course = semester_1[_a];
+                    return [4 /*yield*/, (0, database_1.queryCourse)(course)];
+                case 3:
+                    courseObj = _b.sent();
+                    console.log(courseObj);
+                    _b.label = 4;
+                case 4:
+                    _a++;
+                    return [3 /*break*/, 2];
+                case 5:
+                    _i++;
+                    return [3 /*break*/, 1];
+                case 6: return [2 /*return*/, credits];
+            }
+        });
+    });
+}
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
         var testMajors, genEDArr, finalMajorArr, testCourses, masterList, schedules;
@@ -51,10 +84,9 @@ function testFunc() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    testMajors = ['CS'];
+                    testMajors = ['CS', 'MATH'];
                     genEDArr = ['GENED', 'GENED2'];
                     finalMajorArr = testMajors.concat(genEDArr);
-                    console.log(finalMajorArr);
                     testCourses = ['CS565'];
                     masterList = [];
                     return [4 /*yield*/, expandUserInputViaPrereqs([], testCourses, masterList)];
@@ -72,11 +104,11 @@ function testFunc() {
                                 case 2:
                                     testSchedule = _a.sent();
                                     schedules.push(testSchedule);
+                                    console.log(schedules);
                                     return [2 /*return*/];
                             }
                         });
                     }); });
-                    console.log('at the end');
                     console.log(schedules);
                     return [2 /*return*/];
             }
@@ -325,7 +357,6 @@ function completeSchedule(coursesSelectedInput, majors) {
                     outOfMajorRecs = _c.sent();
                     filteredOutOfMajor = [];
                     filteredGeneral = [];
-                    // console.log(filteredGeneral)
                     // con
                     for (i = 0; i < majors.length; i++) {
                         filteredOutOfMajor.push([]);
