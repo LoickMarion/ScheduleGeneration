@@ -46,24 +46,26 @@ function wait(ms) {
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var testMajors, testCourses, masterList, schedules;
+        var testMajors, genEDArr, finalMajorArr, testCourses, masterList, schedules;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    testMajors = ['CS', 'MATH'];
+                    testMajors = ['CS'];
+                    genEDArr = ['GENED', 'GENED2'];
+                    finalMajorArr = testMajors.concat(genEDArr);
+                    console.log(finalMajorArr);
                     testCourses = ['CS565'];
                     masterList = [];
                     return [4 /*yield*/, expandUserInputViaPrereqs([], testCourses, masterList)];
                 case 1:
                     _a.sent();
-                    console.log('hi');
                     schedules = [];
                     masterList.forEach(function (list) { return __awaiter(_this, void 0, void 0, function () {
                         var finishedCourses, testSchedule;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, completeSchedule(list, testMajors)];
+                                case 0: return [4 /*yield*/, completeSchedule(list, finalMajorArr)];
                                 case 1:
                                     finishedCourses = _a.sent();
                                     return [4 /*yield*/, scheduleFromCourseList(finishedCourses)];
@@ -74,9 +76,7 @@ function testFunc() {
                             }
                         });
                     }); });
-                    return [4 /*yield*/, wait(250)];
-                case 2:
-                    _a.sent();
+                    console.log('at the end');
                     console.log(schedules);
                     return [2 /*return*/];
             }
@@ -113,8 +113,6 @@ function scheduleFromCourseList(classesInSchedule) {
                                             }
                                         });
                                         course = new course_1.Course(courseData[0], courseData[1], mappedPrereqs, courseData[2], courseData[3], courseData[4]);
-                                        console.log(classString);
-                                        console.log(course);
                                         classList.push(course);
                                         return [2 /*return*/, course];
                                 }
@@ -129,7 +127,6 @@ function scheduleFromCourseList(classesInSchedule) {
                     classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
                     a = new course_1.Graph(nodeMap, classStringList, 16);
                     c = a.topoSort();
-                    console.log(c);
                     d = a.makeSchedule();
                     return [2 /*return*/, d];
             }
@@ -160,10 +157,11 @@ function generateSchedule(userRequestedCourses, majors) {
                                 case 0: return [4 /*yield*/, scheduleFromCourseList(list)];
                                 case 1: return [2 /*return*/, _a.sent()];
                             }
-                        }); }); }))];
+                        }); }); }))
+                        //console.log(schedules)
+                    ];
                 case 3:
                     schedules = _a.sent();
-                    console.log(schedules);
                     return [2 /*return*/];
             }
         });
@@ -327,6 +325,8 @@ function completeSchedule(coursesSelectedInput, majors) {
                     outOfMajorRecs = _c.sent();
                     filteredOutOfMajor = [];
                     filteredGeneral = [];
+                    // console.log(filteredGeneral)
+                    // con
                     for (i = 0; i < majors.length; i++) {
                         filteredOutOfMajor.push([]);
                         filteredGeneral.push([]);

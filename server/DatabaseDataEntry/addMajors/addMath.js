@@ -89,7 +89,15 @@ const electives = [
     ['MATH', 'MATH_ELECTIVE', 'STAT535'],
     ['MATH', 'MATH_ELECTIVE', 'STAT590T']
 ]
-
+const before_131 = [
+    ['MATH', '100', true, true, 3],
+    ['MATH', '101', true, true, 3],
+    ['MATH', '102', true, true, 3],
+    ['MATH', '104', true, true, 3],
+    ['MATH', '121', true, true, 3],
+    ['MATH', '127', true, true, 3],
+    ['MATH', '128', true, true, 3]
+]
 const core_classes = [
     ['MATH', '131', true, true, 4],
     ['MATH', '132', true, true, 4],
@@ -217,6 +225,7 @@ const upper_levels = [
 ]
 
 const math_prereqs = [
+    ['MATH128','MATH127'],
     ['MATH132', 'MATH131'],
     ['MATH233','MATH132'],
     ['MATH235', 'MATH132'],
@@ -265,7 +274,8 @@ const math_prereqs = [
     ['MATH545','MATH233'],
     ['MATH545','MATH235'],
     ['MATH545', 'MATH300||CS250'],
-    ['MATH548','STAT315||CICS110'],
+    //['MATH548','STAT315||CICS110'],
+    ['MATH548','STAT315'],
     ['MATH551','MATH233'],
     ['MATH551','MATH235'],
     ['MATH551', 'PHYSICS281||CICS110'],
@@ -289,7 +299,7 @@ const math_prereqs = [
     ['STAT535', 'CICS110'],
     ['STAT590T','STAT516']
 ]
-
+before_131.forEach(data => insertCourseTable.run(...data));
 core_classes.forEach(data => insertCourseTable.run(...data));
 upper_levels.forEach(data => insertCourseTable.run(...data));
 insertCourseTable.finalize();

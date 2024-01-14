@@ -9,20 +9,22 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
 }
 
 async function testFunc() {
-  const testMajors: string[] = ['CS', 'MATH'];
+  const testMajors: string[] = ['CS'];
+  const genEDArr: string[] = ['GENED','GENED2'];
+  const finalMajorArr = testMajors.concat(genEDArr)
+  console.log(finalMajorArr);
   const testCourses: string[] = ['CS565']
   //generateSchedule(testCourses, testMajors);
   const masterList: string[][] = []
   await expandUserInputViaPrereqs([], testCourses, masterList);
-  console.log('hi')
   const schedules: string[][][] = []
   masterList.forEach(async list =>  {
-    const finishedCourses = await completeSchedule(list, testMajors)
+    const finishedCourses = await completeSchedule(list, finalMajorArr)
     let testSchedule = await scheduleFromCourseList(finishedCourses)
-
+  
     schedules.push(testSchedule)
   })
-  await wait(250)
+  console.log('at the end')
   console.log(schedules)
   return;
   //let a = await completeSchedule([], test);
@@ -53,8 +55,7 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
       courseData[3],
       courseData[4],
     );
-    console.log(classString)
-    console.log(course)
+  
     classList.push(course)
     return course;
   }));
@@ -67,7 +68,6 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
 
   const a = new Graph<Node<Course>>(nodeMap, classStringList, 16)
   const c = a.topoSort();
-  console.log(c)
   // console.log(classList)
   const d = a.makeSchedule()
   return d
@@ -79,7 +79,7 @@ async function generateSchedule(userRequestedCourses: string[], majors: string[]
   await expandUserInputViaPrereqs([], userRequestedCourses, masterList);
   masterList = await Promise.all(masterList.map(async (combination) => await completeSchedule(combination, majors)))
   let schedules = await Promise.all(masterList.map(async (list) => await scheduleFromCourseList(list)))
-  console.log(schedules)
+  //console.log(schedules)
 }
 
 
@@ -150,10 +150,10 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   let majorMap = new Map<string, string[]>(); //keep track of which majors a course has been counted for so you dont reuse a course for a specific and electivem e.g. 545 counting for a math elective after being explicitly reuired
 
   //loops through specific courses and automatically adds them. Adds them to list of courses to process in next step in case they can be eectives for other major
+ 
   for (const majorIndex in specific) {
     let major = majors[majorIndex];
     specific[majorIndex].forEach(req => {
-
       if (!coursesForSchedule.includes(req)) {
         coursesForSchedule.push(req);
         let tempArr = majorMap.get(req)
@@ -203,10 +203,11 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
     }
     if (!coursesForSchedule.includes(current)) { coursesForSchedule.push(current); }
   }
-
   const outOfMajorRecs = await Promise.all(majors.map(async (e) => (await getOutOfMajorRecs(e))[1]));
   const filteredOutOfMajor: string[][] = []
   const filteredGeneral: string[][] = []
+  // console.log(filteredGeneral)
+  // con
   for (let i = 0; i < majors.length; i++) {
     filteredOutOfMajor.push([])
     filteredGeneral.push([])

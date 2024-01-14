@@ -68,6 +68,7 @@ var Graph = /** @class */ (function () {
         this.nodeMap = nodeMap;
         this.courseList = courseList;
         this.creditLimit = creditLimit;
+        this.numCoursesUnlockedMap = new Map;
         this.addPrereqLinks();
         this.sortedClasses = this.topoSort();
     }
@@ -77,7 +78,12 @@ var Graph = /** @class */ (function () {
         var workingList = []; //tsc
         var incomingEdgeDict = new Map();
         //initalize each node with 0 incoming edges.
-        this.courseList.forEach(function (course) { return incomingEdgeDict.set(course.toString(), 0); });
+        this.courseList.forEach(function (course) {
+            var _a, _b;
+            incomingEdgeDict.set(course.toString(), 0);
+            var numAdjacent = (_b = (_a = _this.nodeMap.get(course).getAdjacent()) === null || _a === void 0 ? void 0 : _a.length) !== null && _b !== void 0 ? _b : 0;
+            _this.numCoursesUnlockedMap.set(course.toString(), numAdjacent);
+        });
         //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
         this.courseList.forEach(function (course) {
             _this.nodeMap.get(course).getAdjacent().forEach(function (courseName) {
@@ -140,36 +146,36 @@ var Graph = /** @class */ (function () {
         }
         return coursePrereqs.every(function (curr) {
             var parsed = curr.split('||');
-            //console.log(parsed);
-            //console.log(coursesTaken);
             var a = parsed.some(function (e) { return coursesTaken.includes(e); });
-            //console.log(a)
             return a;
         });
     };
     Graph.prototype.makeSchedule = function () {
+        var _this = this;
         var schedule = [];
         var classesToAdd = this.topoSort();
         var coursesTaken = [];
-        // console.log(classesToAdd);
-        // console.log(coursesTaken);
         while (classesToAdd.length > 0) {
             var creditsInSem = 0;
+            var coursesEligibleToTake = [];
             var coursesInSem = [];
-            var i = 0;
-            while (i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)) {
-                //console.log("adding class: " + classesToAdd[i] + '\n'+"courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n'+'\n' + '\n')
-                if (this.enoughSpace(classesToAdd[0], creditsInSem)) {
-                    creditsInSem += this.nodeMap.get(classesToAdd[i]).getCourse().getCredits();
-                    coursesInSem.push(classesToAdd[i]);
-                    classesToAdd.splice(i, 1);
-                    i--;
+            for (var i = 0; i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken); i++) {
+                coursesEligibleToTake.push(classesToAdd[i]);
+            }
+            coursesEligibleToTake.sort(function (a, b) { return _this.numCoursesUnlockedMap.get(b) - _this.numCoursesUnlockedMap.get(a); });
+            //console.log(coursesEligibleToTake);
+            for (var _i = 0, coursesEligibleToTake_1 = coursesEligibleToTake; _i < coursesEligibleToTake_1.length; _i++) {
+                var course = coursesEligibleToTake_1[_i];
+                if (this.enoughSpace(course, creditsInSem)) {
+                    creditsInSem += this.nodeMap.get(course).getCourse().getCredits();
+                    coursesInSem.push(course);
+                    classesToAdd.splice(classesToAdd.indexOf(course), 1);
                 }
-                i++;
             }
             coursesInSem.forEach(function (course) { return coursesTaken.push(course); });
             schedule.push(coursesInSem);
         }
+        console.log(schedule);
         return schedule;
     };
     return Graph;

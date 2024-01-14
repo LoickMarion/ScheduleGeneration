@@ -76,6 +76,7 @@ export class Node<T>{
 export class Graph<T>{
   //private node_list: Node<T>[];
   private nodeMap: Map<string,Node<T>>;
+  private numCoursesUnlockedMap: Map<string, number>;
   private courseList: string[];
   private creditLimit: number;
   private sortedClasses: string[];
@@ -87,7 +88,7 @@ export class Graph<T>{
     this.nodeMap = nodeMap;
     this.courseList = courseList;
     this.creditLimit = creditLimit;
-
+    this.numCoursesUnlockedMap = new Map<string,number>;
     this.addPrereqLinks();
     this.sortedClasses = this.topoSort();
   }
@@ -97,7 +98,10 @@ export class Graph<T>{
     let workingList: string[] = []    //tsc
     let incomingEdgeDict = new Map<string,number>();
     //initalize each node with 0 incoming edges.
-    this.courseList.forEach((course) => incomingEdgeDict.set(course.toString(),0))
+    this.courseList.forEach((course) => {
+      incomingEdgeDict.set(course.toString(),0);
+      let numAdjacent = this.nodeMap.get(course)!.getAdjacent()?.length ?? 0
+      this.numCoursesUnlockedMap.set(course.toString(), numAdjacent)})
 
     //update incoming edge dict  to have number of  edges unlocking each node. logic is that when this is 0, a course will be eligible to be taken. 
 
@@ -175,10 +179,8 @@ export class Graph<T>{
     }
     return coursePrereqs.every((curr) => {
      const parsed = curr.split('||');
-     //console.log(parsed);
-     //console.log(coursesTaken);
+ 
      const a = parsed.some((e) => coursesTaken.includes(e))
-     //console.log(a)
      return a;
     });
   }
@@ -187,29 +189,33 @@ export class Graph<T>{
     const schedule: string[][] = []
     const classesToAdd = this.topoSort()
     const coursesTaken: string[] = []
-
-    // console.log(classesToAdd);
-    // console.log(coursesTaken);
+    
     
     while (classesToAdd.length > 0){
 
       let creditsInSem = 0;
+      let coursesEligibleToTake: string[] = []
       let coursesInSem: string[] = []
-      let i = 0
-      while(i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken)){
-        //console.log("adding class: " + classesToAdd[i] + '\n'+"courses taken: " + coursesTaken + '\n' + "prereqs satisfied: " + this.prereqsSatisfied(classesToAdd[i], coursesTaken) + '\n'+'\n' + '\n')
-        if(this.enoughSpace(classesToAdd[0],creditsInSem)){
-          creditsInSem += this.nodeMap.get(classesToAdd[i])!.getCourse().getCredits();
-          coursesInSem.push(classesToAdd[i]);
-          
-          classesToAdd.splice(i,1);
-          i--;
-        }
-        i++;
+ 
+      for(let i =0;i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken);i++){
+        coursesEligibleToTake.push(classesToAdd[i])
       }
+
+      coursesEligibleToTake.sort((a,b) => this.numCoursesUnlockedMap.get(b)! - this.numCoursesUnlockedMap.get(a)!)
+      //console.log(coursesEligibleToTake);
+
+      for(const course of coursesEligibleToTake){
+        if(this.enoughSpace(course,creditsInSem)){
+          creditsInSem += this.nodeMap.get(course)!.getCourse().getCredits();
+          coursesInSem.push(course)
+          classesToAdd.splice(classesToAdd.indexOf(course),1)
+        }
+      }
+      
       coursesInSem.forEach((course)=>coursesTaken.push(course))
       schedule.push(coursesInSem);
     }
+    console.log(schedule);
     return schedule;
   }
 }

@@ -235,13 +235,15 @@ const coreClasses = [
     ['PHYSICS', '181', true, true, 4],
     ['PHYSICS', '152', true, true, 4],
     ['PHYSICS', '182', true, true, 4],
-    ['ENGLISH', '112', true, true, 3],
-    ['GEN-ED','1',true,true,3],
-    ['GEN-ED','2',true,true,3],
-    ['GEN-ED','3',true,true,3],
-    ['GEN-ED','4',true,true,3]
   ]
-  
+  const nonCSPrereqs = [
+    ['CHEM112','CHEM111'],
+    ['CHEM122','CHEM121'],
+    ['PHYSICS152','PHYSICS151'],
+    ['PHYSICS182','PHYSICS181'],
+    ['GEOL131','GEOL100||GEOL101||GEOL103||GEOL105||GEOL285'] //can be concurrent
+    
+  ]
   const csPrereqs =[
     ['CICS160','CICS110'],
     ['CICS210','CICS160'],
@@ -354,6 +356,7 @@ const coreClasses = [
   insertCoursesPerReq.finalize();
 
   csPrereqs.forEach(data => insertPrereqTable.run(...data));
+  nonCSPrereqs.forEach(data => insertPrereqTable.run(...data));
   insertPrereqTable.finalize();
 
   
