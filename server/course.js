@@ -154,7 +154,6 @@ var Graph = /** @class */ (function () {
         // console.log(classesToAdd);
         // console.log(coursesTaken);
         while (classesToAdd.length > 0) {
-            console.log(classesToAdd);
             var creditsInSem = 0;
             var coursesInSem = [];
             var i = 0;

@@ -192,7 +192,6 @@ export class Graph<T>{
     // console.log(coursesTaken);
     
     while (classesToAdd.length > 0){
-          console.log(classesToAdd)
 
       let creditsInSem = 0;
       let coursesInSem: string[] = []

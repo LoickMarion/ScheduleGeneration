@@ -182,6 +182,7 @@ const coreClasses = [
     ['CS', '345', true, true, 3],
     ['CS', '348', true, true, 3],
     ['CS', '360', true, true, 3],
+    ['CS', '365', true, true, 3],
     ['CS', '370', true, true, 3],
     ['CS', '373', true, true, 3],
     ['CS', '377', true, true, 4],

@@ -46,25 +46,38 @@ function wait(ms) {
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var testMajors, testCourses, masterList, expandedCourses, finishedCourses;
+        var testMajors, testCourses, masterList, schedules;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     testMajors = ['CS', 'MATH'];
-                    testCourses = ['CS589', 'CS564', 'CS390R', 'MATH548'];
+                    testCourses = ['CS565'];
                     masterList = [];
                     return [4 /*yield*/, expandUserInputViaPrereqs([], testCourses, masterList)];
                 case 1:
                     _a.sent();
-                    expandedCourses = masterList[0];
-                    return [4 /*yield*/, completeSchedule(expandedCourses, testMajors)
-                        // let testSchedule = await scheduleFromCourseList(finishedCourses)
-                        // console.log(testSchedule)
-                    ];
+                    console.log('hi');
+                    schedules = [];
+                    masterList.forEach(function (list) { return __awaiter(_this, void 0, void 0, function () {
+                        var finishedCourses, testSchedule;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, completeSchedule(list, testMajors)];
+                                case 1:
+                                    finishedCourses = _a.sent();
+                                    return [4 /*yield*/, scheduleFromCourseList(finishedCourses)];
+                                case 2:
+                                    testSchedule = _a.sent();
+                                    schedules.push(testSchedule);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                    return [4 /*yield*/, wait(250)];
                 case 2:
-                    finishedCourses = _a.sent();
-                    // let testSchedule = await scheduleFromCourseList(finishedCourses)
-                    // console.log(testSchedule)
+                    _a.sent();
+                    console.log(schedules);
                     return [2 /*return*/];
             }
         });
@@ -100,6 +113,8 @@ function scheduleFromCourseList(classesInSchedule) {
                                             }
                                         });
                                         course = new course_1.Course(courseData[0], courseData[1], mappedPrereqs, courseData[2], courseData[3], courseData[4]);
+                                        console.log(classString);
+                                        console.log(course);
                                         classList.push(course);
                                         return [2 /*return*/, course];
                                 }
@@ -114,6 +129,7 @@ function scheduleFromCourseList(classesInSchedule) {
                     classList.forEach(function (Course) { return classMap.set(Course.getMajor() + Course.getNumber(), Course); });
                     a = new course_1.Graph(nodeMap, classStringList, 16);
                     c = a.topoSort();
+                    console.log(c);
                     d = a.makeSchedule();
                     return [2 /*return*/, d];
             }
@@ -346,14 +362,7 @@ function completeSchedule(coursesSelectedInput, majors) {
                 case 10: return [4 /*yield*/, randomClassFilling(filteredGeneral, coursesForSchedule, majors, majorMap)];
                 case 11:
                     restOfClasses = _c.sent();
-                    console.log(restOfClasses);
-                    return [4 /*yield*/, wait(1000)
-                        //console.log(coursesForSchedule)
-                    ];
-                case 12:
-                    _c.sent();
-                    //console.log(coursesForSchedule)
-                    console.log('finished complete schedule');
+                    restOfClasses.forEach(function (course) { return coursesForSchedule.push(course); });
                     return [2 /*return*/, coursesForSchedule];
             }
         });
@@ -364,47 +373,63 @@ function randomClassFilling(filteredGeneral, coursesAlreadyTaken, majors, majorM
         var coursesAdded;
         var _this = this;
         return __generator(this, function (_a) {
-            coursesAdded = [];
-            filteredGeneral.forEach(function (major, acc) { return __awaiter(_this, void 0, void 0, function () {
-                var _this = this;
-                return __generator(this, function (_a) {
-                    major.forEach(function (requirement) { return __awaiter(_this, void 0, void 0, function () {
-                        var courses, chosen, a, chosenCourse, b, chosenCoursePrereqs, prereqsSatisfied, courseAlreadyTaken;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, (0, database_1.getCoursesPerReq)(requirement)];
-                                case 1:
-                                    courses = _a.sent();
-                                    chosen = false;
-                                    a = Math.floor(Math.random() * courses.length);
-                                    _a.label = 2;
-                                case 2:
-                                    if (!!chosen) return [3 /*break*/, 4];
-                                    a = (a + 1) % (courses.length - 1);
-                                    chosenCourse = courses[a];
-                                    b = majorMap.get(chosenCourse);
-                                    return [4 /*yield*/, (0, database_1.queryPrereqs)(chosenCourse)];
-                                case 3:
-                                    chosenCoursePrereqs = _a.sent();
-                                    prereqsSatisfied = chosenCoursePrereqs.every(function (e) { return e.split('||').some(function (split) { return coursesAlreadyTaken.includes(split); }); });
-                                    courseAlreadyTaken = coursesAlreadyTaken.includes(chosenCourse);
-                                    if (courseAlreadyTaken || !prereqsSatisfied || (b && b.includes(majors[acc]))) {
-                                        return [3 /*break*/, 2];
-                                    }
-                                    else {
-                                        coursesAdded.push(chosenCourse);
-                                        chosen = true;
-                                    }
-                                    return [3 /*break*/, 2];
-                                case 4: return [2 /*return*/];
-                            }
-                        });
-                    }); });
-                    acc++;
-                    return [2 /*return*/];
-                });
-            }); });
-            return [2 /*return*/, coursesAdded];
+            switch (_a.label) {
+                case 0:
+                    coursesAdded = [];
+                    return [4 /*yield*/, Promise.all(filteredGeneral.map(function (major, acc) { return __awaiter(_this, void 0, void 0, function () {
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: 
+                                    //console.log('in first promise')
+                                    return [4 /*yield*/, Promise.all(major.map(function (requirement) { return __awaiter(_this, void 0, void 0, function () {
+                                            var courses, chosen, a, chosenCourse, b, chosenCoursePrereqs, prereqsSatisfied, courseAlreadyTaken;
+                                            return __generator(this, function (_a) {
+                                                switch (_a.label) {
+                                                    case 0: return [4 /*yield*/, (0, database_1.getCoursesPerReq)(requirement)];
+                                                    case 1:
+                                                        courses = _a.sent();
+                                                        chosen = false;
+                                                        a = Math.floor(Math.random() * courses.length);
+                                                        _a.label = 2;
+                                                    case 2:
+                                                        if (!!chosen) return [3 /*break*/, 4];
+                                                        a = (a + 1) % (courses.length - 1);
+                                                        chosenCourse = courses[a];
+                                                        b = majorMap.get(chosenCourse);
+                                                        return [4 /*yield*/, (0, database_1.queryPrereqs)(chosenCourse)];
+                                                    case 3:
+                                                        chosenCoursePrereqs = _a.sent();
+                                                        prereqsSatisfied = chosenCoursePrereqs.every(function (e) {
+                                                            return e.split('||').some(function (split) { return coursesAlreadyTaken.includes(split); });
+                                                        });
+                                                        courseAlreadyTaken = coursesAlreadyTaken.includes(chosenCourse) || coursesAdded.includes(chosenCourse);
+                                                        if (courseAlreadyTaken || !prereqsSatisfied || (b && b.includes(majors[acc]))) {
+                                                            return [3 /*break*/, 2];
+                                                        }
+                                                        else {
+                                                            if (!coursesAdded.includes(chosenCourse)) {
+                                                                coursesAdded.push(chosenCourse);
+                                                                chosen = true;
+                                                            }
+                                                        }
+                                                        return [3 /*break*/, 2];
+                                                    case 4: return [2 /*return*/];
+                                                }
+                                            });
+                                        }); }))];
+                                    case 1:
+                                        //console.log('in first promise')
+                                        _a.sent();
+                                        acc++;
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); }))];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, coursesAdded];
+            }
         });
     });
 }
@@ -494,4 +519,3 @@ function pickBestReq(oneMajor, requirementsSatisfied, major) {
     return "None";
 }
 testFunc();
-console.log('done');
