@@ -1,5 +1,6 @@
+import { get } from "http";
 import { Course, Node, Graph } from "./course";
-import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorRecs, getMajorsPerCourse, } from "./database";
+import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorRecs, getMajorsPerCourse, queryEntireMajor, getMajorData, returnedData } from "./database";
 import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
 
 function wait(ms: number): Promise<void> { //Use for test, can delete at end
@@ -7,6 +8,14 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
     setTimeout(resolve, ms);
   });
 }
+let data: returnedData;
+async function fetchData(major: string){
+  return await getMajorData(major)
+}
+fetchData("CS").then((result) => {
+  data = result;
+})
+
 
 async function getTotalCreditNumber(schedule: string[][]): Promise<number>{
   let credits = 0;
@@ -20,29 +29,35 @@ async function getTotalCreditNumber(schedule: string[][]): Promise<number>{
 }
 
 async function testFunc() {
-  const testMajors: string[] = ['CS','MATH'];
-  const genEDArr: string[] = ['GENED','GENED2'];
+  const testMajors: string[] = ['CS','MATH', 'GENED2'];
+  //const genEDArr: string[] = ['GENED','GENED2'];
+  const genEDArr: string[] = []
+
   const finalMajorArr = testMajors.concat(genEDArr)
-  const testCourses: string[] = ['CS565']
+  const testCourses: string[] = ['CS590AB']
   //generateSchedule(testCourses, testMajors);
   const masterList: string[][] = []
   await expandUserInputViaPrereqs([], testCourses, masterList);
   const schedules: string[][][] = []
-  masterList.forEach(async list =>  {
-    const finishedCourses = await completeSchedule(list, finalMajorArr)
-    let testSchedule = await scheduleFromCourseList(finishedCourses)
-    schedules.push(testSchedule)
-    console.log(schedules)
-  })
-  console.log(schedules)
-  return;
-}
+  console.log('first \n')
+  //console.log(masterList);
+  let step1: string[][] = await Promise.all(masterList.map(async list =>  await completeSchedule(list,finalMajorArr)))
+  console.log('second \n')
+  console.log(step1);
+  let step2: string[][][] = await Promise.all(step1.map(async list => await (scheduleFromCourseList(list))))
+  console.log('third \n')
+  console.log(step2);
+}  
+
+
+
 async function scheduleFromCourseList(classesInSchedule: string[]) {
 
   const classMap = new Map<string, Course>();
   let nodeMap = new Map<string, Node<Course>>();
   const classList: Course[] = [];
-  const classPromises = await Promise.all(classesInSchedule.map(async (classString) => { //Idk if we need to assign this to classPromises?
+  //console.log('hi')
+  await Promise.all(classesInSchedule.map(async (classString) => { //Idk if we need to assign this to classPromises?
     const courseData = await queryCourse(classString);
     const prereqData = await queryPrereqs(classString);
     const mappedPrereqs = prereqData.map((prereq) => {
@@ -62,11 +77,12 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
       courseData[3],
       courseData[4],
     );
-  
+    // console.log(classString)
+    // console.log(course);
     classList.push(course)
     return course;
   }));
-  // console.log(classPromises)
+  //console.log(classList)
   classList.forEach((Course) => nodeMap.set(Course.getMajor() + Course.getNumber(), new Node(Course, [])));
   const classStringList: string[] = [];
   classList.forEach((Course) => classStringList.push(Course.getMajor() + Course.getNumber()))
@@ -75,7 +91,6 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
 
   const a = new Graph<Node<Course>>(nodeMap, classStringList, 16)
   const c = a.topoSort();
-  // console.log(classList)
   const d = a.makeSchedule()
   return d
 }
@@ -86,13 +101,12 @@ async function generateSchedule(userRequestedCourses: string[], majors: string[]
   await expandUserInputViaPrereqs([], userRequestedCourses, masterList);
   masterList = await Promise.all(masterList.map(async (combination) => await completeSchedule(combination, majors)))
   let schedules = await Promise.all(masterList.map(async (list) => await scheduleFromCourseList(list)))
-  //console.log(schedules)
 }
 
 
 async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any) {
 
-  while (coursesToAdd.length > 0) {       //continue until no more courses to take
+  while (coursesToAdd.length > 0) {  //continue until no more courses to take
 
     let course = coursesToAdd.shift() //look at the first course we need to add
     let splitCourse = course!.split('||'); //split the courses so we can check is there is an or
@@ -215,7 +229,6 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   const filteredOutOfMajor: string[][] = []
   const filteredGeneral: string[][] = []
   
-  // con
   for (let i = 0; i < majors.length; i++) {
     filteredOutOfMajor.push([])
     filteredGeneral.push([])
@@ -263,12 +276,10 @@ async function randomClassFilling(filteredGeneral: string[][], coursesAlreadyTak
   const coursesAdded: string[] = [];
   await Promise.all(
     filteredGeneral.map(async (major, acc) => {
-      //console.log('in first promise')
 
       await Promise.all(
 
         major.map(async (requirement) => {
-          //console.log('in second promise')
 
           const courses = await getCoursesPerReq(requirement);
           let chosen = false;
@@ -297,8 +308,7 @@ async function randomClassFilling(filteredGeneral: string[][], coursesAlreadyTak
         })
       );
       acc++;
-      //console.log('got to end of promise 1')
-      //return;
+      //return
     })
   );
   return coursesAdded;
@@ -350,4 +360,4 @@ function pickBestReq(oneMajor: string[], requirementsSatisfied: string[], major:
 }
 
 
-testFunc();
+//testFunc();

@@ -25,14 +25,17 @@ const gened_classes = [
     ['ASTRON','100', true,true,4],
     ['FOOD-SCI','120', true,true,4],
     ['GEOGRAPH','110', true,true,4],
-    ['GEOLOGY','101', true,true,4],
-    ['ANTHRO','103', true,true,4],
+    ['GEOL','100', true,true,4],
+    ['GEOL','101', true,true,4],
+    ['GEOL','285', true,true,4],
+    ['ANTHRO','101', true,true,4],
     ['BIOLOGY','105', true,true,3],
     ['BIOLOGY','110', true,true,3],
     ['BIOLOGY','151', true,true,3],
     ['FOOD-SCI','150', true,true,4],
     ['PHIL','160', true,true,4],
     ['MUSIC','101', true,true,4],
+    ['MUSIC','110', true,true,4],
     ['ENGLISH','115', true,true,4],
     ['COMP-LIT','100', true,true,4],
     ['COMP-LIT','141', true,true,4],
@@ -41,7 +44,6 @@ const gened_classes = [
     ['HISTORY','120', true,true,4],
     ['CLASSICS','102', true,true,4],
     ['ANTHRO','150', true,true,4],
-    ['ANTRO','101', true,true,4],
     ['ECON','103', true,true,4],
     ['ENGLISH','150', true,true,4],
     ['EDUC','101', true,true,4],
@@ -74,7 +76,7 @@ const PHYSICAL_WORLD = [
     ['GENED','PHYSICAL_WORLD', 'CHEM111'],
     ['GENED','PHYSICAL_WORLD', 'FOOD-SCI120'],
     ['GENED','PHYSICAL_WORLD', 'GEOGRAPH110'],
-    ['GENED','PHYSICAL_WORLD', 'GEOLOGY101']
+    ['GENED','PHYSICAL_WORLD', 'GEOL101']
 ]
 
 const ATorAL = [

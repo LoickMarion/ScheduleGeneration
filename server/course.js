@@ -175,7 +175,7 @@ var Graph = /** @class */ (function () {
             coursesInSem.forEach(function (course) { return coursesTaken.push(course); });
             schedule.push(coursesInSem);
         }
-        console.log(schedule);
+        //console.log(schedule);
         return schedule;
     };
     return Graph;

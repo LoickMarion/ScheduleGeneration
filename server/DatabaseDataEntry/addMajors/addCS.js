@@ -179,6 +179,7 @@ const coreClasses = [
     ['CS', '320', true, true, 4],
     ['CS', '325', true, true, 3],
     ['CS', '326', true, true, 4],
+    ['CS', '335', true, true, 3],
     ['CS', '345', true, true, 3],
     ['CS', '348', true, true, 3],
     ['CS', '360', true, true, 3],
@@ -205,12 +206,14 @@ const coreClasses = [
   
   const electives500 = [
     ['CS', '501', true, true, 3],
+    ['CS', '515', true, true, 3],
     ['CS', '520', true, true, 3],
     ['CS', '528', true, true, 3],
     ['CS', '532', true, true, 3],
     ['CS', '535', true, true, 3],
     ['CS', '546', true, true, 3],
     ['CS', '550', true, true, 3],
+    ['CS', '560', true, true, 3],
     ['CS', '561', true, true, 3],
     ['CS', '564', true, true, 3],
     ['CS', '565', true, true, 3],
@@ -230,17 +233,12 @@ const coreClasses = [
     ['GEOL', '101', true, true, 4],
     ['GEOL', '103', true, true, 4],
     ['GEOL', '105', true, true, 4],
-    ['GEOL', '131', true, true, 4],
-    ['PHYSICS', '151', true, true, 4],
-    ['PHYSICS', '181', true, true, 4],
-    ['PHYSICS', '152', true, true, 4],
-    ['PHYSICS', '182', true, true, 4],
+    ['GEOL', '131', true, true, 4]
+    
   ]
   const nonCSPrereqs = [
     ['CHEM112','CHEM111'],
     ['CHEM122','CHEM121'],
-    ['PHYSICS152','PHYSICS151'],
-    ['PHYSICS182','PHYSICS181'],
     ['GEOL131','GEOL100||GEOL101||GEOL103||GEOL105||GEOL285'] //can be concurrent
     
   ]

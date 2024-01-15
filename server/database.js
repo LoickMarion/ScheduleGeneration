@@ -36,11 +36,166 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryCourse = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.getOutOfMajorRecs = exports.getMajorsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = void 0;
+exports.queryCourse = exports.queryEntireMajor = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.getOutOfMajorRecs = exports.getMajorsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = exports.getMajorData = void 0;
+var course_1 = require("./course");
 //import {sqlite3} from 'sqlite3';
 var sqlite3 = require('sqlite3');
-// Open a connection to the SQLite database
+// Open a connection to the SQLite database'
 var db = new sqlite3.Database('./DatabaseDataEntry/courseDatabase.db');
+function getMajorData(major) {
+    return __awaiter(this, void 0, void 0, function () {
+        var majorRequirements, majorReqMap, courseReqMap, reqFulfillingCourses, _a, _b, _c, totalCourses, possibleCoursesMap, prereqMap, a;
+        var _this = this;
+        return __generator(this, function (_d) {
+            switch (_d.label) {
+                case 0: return [4 /*yield*/, getMajorRequirements(major)
+                    //map of each major requirement to coruses it fulfills
+                ];
+                case 1:
+                    majorRequirements = _d.sent();
+                    majorReqMap = new Map();
+                    return [4 /*yield*/, Promise.all(majorRequirements.map(function (e) { return __awaiter(_this, void 0, void 0, function () {
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, Promise.all(e.map(function (f) { return __awaiter(_this, void 0, void 0, function () { var _a, _b, _c; return __generator(this, function (_d) {
+                                            switch (_d.label) {
+                                                case 0:
+                                                    _b = (_a = majorReqMap).set;
+                                                    _c = [f];
+                                                    return [4 /*yield*/, getCoursesPerReq(f)];
+                                                case 1: return [2 /*return*/, _b.apply(_a, _c.concat([_d.sent()]))];
+                                            }
+                                        }); }); }))];
+                                    case 1: return [2 /*return*/, _a.sent()];
+                                }
+                            });
+                        }); }))
+                        //map of each course to the major requirement it fulfills
+                    ];
+                case 2:
+                    _d.sent();
+                    courseReqMap = new Map();
+                    _b = (_a = Array).from;
+                    _c = Set.bind;
+                    return [4 /*yield*/, Promise.all(majorRequirements.map(function (e) { return __awaiter(_this, void 0, void 0, function () {
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, Promise.all(e.map(function (f) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0: return [4 /*yield*/, getCoursesPerReq(f)];
+                                                case 1: return [2 /*return*/, _a.sent()];
+                                            }
+                                        }); }); }))];
+                                    case 1: return [2 /*return*/, _a.sent()];
+                                }
+                            });
+                        }); }))];
+                case 3:
+                    reqFulfillingCourses = _b.apply(_a, [new (_c.apply(Set, [void 0, (_d.sent()).flat().flat().flat()]))()]);
+                    return [4 /*yield*/, Promise.all(reqFulfillingCourses.map(function (course) { return __awaiter(_this, void 0, void 0, function () { var _a, _b, _c; return __generator(this, function (_d) {
+                            switch (_d.label) {
+                                case 0:
+                                    _b = (_a = courseReqMap).set;
+                                    _c = [course];
+                                    return [4 /*yield*/, getReqsPerCourse(course)];
+                                case 1: return [2 /*return*/, _b.apply(_a, _c.concat([_d.sent()]))];
+                            }
+                        }); }); }))
+                        //list of all courses with data
+                    ];
+                case 4:
+                    _d.sent();
+                    return [4 /*yield*/, getPrereqs(reqFulfillingCourses)];
+                case 5:
+                    totalCourses = _d.sent();
+                    possibleCoursesMap = new Map();
+                    return [4 /*yield*/, Promise.all(totalCourses.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
+                            var courseData, prereqData, course;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, queryCourse(classString)];
+                                    case 1:
+                                        courseData = _a.sent();
+                                        return [4 /*yield*/, queryPrereqs(classString)];
+                                    case 2:
+                                        prereqData = _a.sent();
+                                        course = new course_1.Course(courseData[0], courseData[1], prereqData, courseData[2], courseData[3], courseData[4]);
+                                        possibleCoursesMap.set(classString, course);
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); }))];
+                case 6:
+                    _d.sent();
+                    prereqMap = new Map();
+                    return [4 /*yield*/, Promise.all(totalCourses.map(function (course) { return __awaiter(_this, void 0, void 0, function () {
+                            var _a, _b, _c;
+                            return __generator(this, function (_d) {
+                                switch (_d.label) {
+                                    case 0:
+                                        _b = (_a = prereqMap).set;
+                                        _c = [course];
+                                        return [4 /*yield*/, queryPrereqs(course)];
+                                    case 1:
+                                        _b.apply(_a, _c.concat([_d.sent()]));
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); }))];
+                case 7:
+                    _d.sent();
+                    console.log(prereqMap);
+                    a = { majorRequirements: majorRequirements, majorReqMap: majorReqMap, possibleCoursesMap: possibleCoursesMap, prereqMap: prereqMap };
+                    console.log(a);
+                    return [2 /*return*/, [possibleCoursesMap, prereqMap]]; //totalCourses  // }
+            }
+        });
+    });
+}
+exports.getMajorData = getMajorData;
+function getPrereqs(courses) {
+    return __awaiter(this, void 0, void 0, function () {
+        var newCourses, processingCourses;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    newCourses = [];
+                    processingCourses = courses.slice();
+                    return [4 /*yield*/, Promise.all(processingCourses.map(function (course) { return __awaiter(_this, void 0, void 0, function () {
+                            var prereqs;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, queryPrereqs(course)];
+                                    case 1:
+                                        prereqs = _a.sent();
+                                        return [4 /*yield*/, Promise.all(prereqs.map(function (e) { return e.split('||').forEach(function (f) {
+                                                if (!processingCourses.includes(f) && !newCourses.includes(f)) {
+                                                    newCourses.push(f);
+                                                }
+                                            }); }))];
+                                    case 2:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); }))];
+                case 1:
+                    _a.sent();
+                    if (newCourses.length == 0) {
+                        return [2 /*return*/, processingCourses];
+                    }
+                    else {
+                        newCourses.forEach(function (e) { return processingCourses.push(e); });
+                        return [2 /*return*/, getPrereqs(processingCourses)];
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 // Function to retrieve data from the database
 function fetchDataFromDatabase(query) {
     return new Promise(function (resolve, reject) {
@@ -59,6 +214,24 @@ function closeDatabase() {
     db.close();
 }
 exports.closeDatabase = closeDatabase;
+function parseEntireMajorJSONtoArr(jsonData) {
+    var output = [];
+    jsonData.forEach(function (e) {
+        var layer = [];
+        var major = e.major;
+        var courseNumber = e.courseNumber;
+        var fall = e.fall;
+        var spring = e.spring;
+        var credits = e.credits;
+        layer.push(major);
+        layer.push(courseNumber);
+        layer.push(fall);
+        layer.push(spring);
+        layer.push(credits);
+        output.push(layer);
+    });
+    return output;
+}
 function parseCourseJSONtoArr(jsonData) {
     var layer = [];
     jsonData.forEach(function (e) {
@@ -78,6 +251,7 @@ function parseCourseJSONtoArr(jsonData) {
 function parsePrereqJSONtoArr(jsonData) {
     var output = [];
     jsonData.forEach(function (e) {
+        //console.log("Course: " + e.course + " prereq(s): " + e.prereq + "\n")
         output.push(e.prereq);
     });
     return output;
@@ -211,6 +385,22 @@ function queryPrereqs(course) {
     });
 }
 exports.queryPrereqs = queryPrereqs;
+function queryEntireMajor(major) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query, courses;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = "SELECT * FROM course_table WHERE major = '" + major + "';";
+                    return [4 /*yield*/, fetchDataFromDatabase(query)];
+                case 1:
+                    courses = _a.sent();
+                    return [2 /*return*/, parseEntireMajorJSONtoArr(courses)];
+            }
+        });
+    });
+}
+exports.queryEntireMajor = queryEntireMajor;
 function queryCourse(course) {
     return __awaiter(this, void 0, void 0, function () {
         var query, courses;

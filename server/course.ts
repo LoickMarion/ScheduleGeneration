@@ -215,7 +215,7 @@ export class Graph<T>{
       coursesInSem.forEach((course)=>coursesTaken.push(course))
       schedule.push(coursesInSem);
     }
-    console.log(schedule);
+    //console.log(schedule);
     return schedule;
   }
 }
