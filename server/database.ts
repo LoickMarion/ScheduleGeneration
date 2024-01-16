@@ -6,8 +6,12 @@ const sqlite3 = require('sqlite3');
 const db = new sqlite3.Database('./DatabaseDataEntry/courseDatabase.db');
 
 export type returnedData = {
+  major: string
   majorRequirements: string[][]
+  outOfMajorReqs: string[]
+  reqFulfillingCourses: string[]
   majorReqMap: Map<string,string[]>
+  courseReqMap: Map<string, string[]>
   possibleCoursesMap: Map<string,Course>
   prereqMap: Map<string, string[]>
 }
@@ -16,11 +20,13 @@ export async function getMajorData(major : string){
   //list of major requirements
   let majorRequirements = await getMajorRequirements(major)
   
+  //list of out of major reqs
+  let outOfMajorReqs = (await getOutOfMajorReqs(major))[1]
   //map of each major requirement to coruses it fulfills
   const majorReqMap : Map<string,string[]> = new Map()
   await Promise.all(majorRequirements.map(async (e) => await Promise.all(e.map(async (f) => majorReqMap.set(f, await getCoursesPerReq(f))))))
+ 
   //map of each course to the major requirement it fulfills
-
   const courseReqMap : Map<string,string[]> = new Map();
 
   const reqFulfillingCourses = Array.from(new Set((await Promise.all(majorRequirements.map(async (e) => await Promise.all(e.map(async (f) => await getCoursesPerReq(f)))))).flat().flat().flat()))
@@ -30,6 +36,7 @@ export async function getMajorData(major : string){
 
   //list of all courses with data
   const totalCourses = await getPrereqs(reqFulfillingCourses)
+
 
   const possibleCoursesMap: Map<string,Course> = new Map()
   await Promise.all(totalCourses.map(async (classString) => { //Idk if we need to assign this to classPromises?
@@ -51,8 +58,7 @@ export async function getMajorData(major : string){
   await Promise.all(totalCourses.map(async (course) => { 
     prereqMap.set(course, await queryPrereqs(course))
   }))
-  console.log(prereqMap)
-  let output: returnedData = {majorRequirements, majorReqMap, possibleCoursesMap, prereqMap}
+  let output: returnedData = {major,majorRequirements, outOfMajorReqs, reqFulfillingCourses, majorReqMap, courseReqMap, possibleCoursesMap, prereqMap}
   return output;
 }
 
@@ -160,7 +166,7 @@ export async function getMajorsPerCourse(course: string){
   const majors = await fetchDataFromDatabase(query);
   return parseGetMajorsPerCourse(majors)
 }
-export async function getOutOfMajorRecs(major: string){
+export async function getOutOfMajorReqs(major: string){
   const query = "SELECT * FROM major_req_table WHERE major = '" + major + "' AND outOfMajor = true;";
   const courses = await fetchDataFromDatabase(query);
   return parseMajorReqJSONtoArr(courses)

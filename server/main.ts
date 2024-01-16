@@ -1,6 +1,6 @@
 import { get } from "http";
 import { Course, Node, Graph } from "./course";
-import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorRecs, getMajorsPerCourse, queryEntireMajor, getMajorData, returnedData } from "./database";
+import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorReqs, getMajorsPerCourse, queryEntireMajor, getMajorData, returnedData } from "./database";
 import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
 
 function wait(ms: number): Promise<void> { //Use for test, can delete at end
@@ -8,48 +8,39 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
     setTimeout(resolve, ms);
   });
 }
-let data: returnedData;
-async function fetchData(major: string){
-  return await getMajorData(major)
-}
-fetchData("CS").then((result) => {
-  data = result;
-})
-
-
-async function getTotalCreditNumber(schedule: string[][]): Promise<number>{
-  let credits = 0;
-  for(const semester of schedule){
-    for(const course of semester){
-      let courseObj = await queryCourse(course);
-      console.log(courseObj);
-    }
-  }
-  return credits;
-}
-
+testFunc()
 async function testFunc() {
   const testMajors: string[] = ['CS','MATH', 'GENED2'];
   //const genEDArr: string[] = ['GENED','GENED2'];
   const genEDArr: string[] = []
 
   const finalMajorArr = testMajors.concat(genEDArr)
-  const testCourses: string[] = ['CS590AB']
-  //generateSchedule(testCourses, testMajors);
-  const masterList: string[][] = []
-  await expandUserInputViaPrereqs([], testCourses, masterList);
-  const schedules: string[][][] = []
-  console.log('first \n')
-  //console.log(masterList);
-  let step1: string[][] = await Promise.all(masterList.map(async list =>  await completeSchedule(list,finalMajorArr)))
-  console.log('second \n')
-  console.log(step1);
-  let step2: string[][][] = await Promise.all(step1.map(async list => await (scheduleFromCourseList(list))))
-  console.log('third \n')
-  console.log(step2);
+  const testCourses: string[] = ['CS590AB','CS564']
+  const coursesAlreadyTaken: string[] = [];
+  const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
+  let schedule = generateSchedule(coursesAlreadyTaken,testCourses, testMajors,allData);
+  
+ 
 }  
 
-
+async function generateSchedule(coursesTaken: string[],userRequestedCourses: string[], majors: string[], allData: any) {
+  let masterList: string[][] = [];
+  expandUserInputViaPrereqs([], userRequestedCourses, masterList,allData);
+  let b = await completeSchedule(masterList[0],majors,allData)
+  console.log(b)
+  // masterList = await Promise.all(masterList.map(async (combination) => await completeSchedule(combination, majors)))
+  // let schedules = await Promise.all(masterList.map(async (list) => await scheduleFromCourseList(list)))
+  // await expandUserInputViaPrereqs([], testCourses, masterList);
+  // const schedules: string[][][] = []
+  // console.log('first \n')
+  // //console.log(masterList);
+  // let step1: string[][] = await Promise.all(masterList.map(async list =>  await completeSchedule(list,finalMajorArr)))
+  // console.log('second \n')
+  // console.log(step1);
+  // let step2: string[][][] = await Promise.all(step1.map(async list => await (scheduleFromCourseList(list))))
+  // console.log('third \n')
+  // console.log(step2);
+}
 
 async function scheduleFromCourseList(classesInSchedule: string[]) {
 
@@ -95,22 +86,12 @@ async function scheduleFromCourseList(classesInSchedule: string[]) {
   return d
 }
 
-
-async function generateSchedule(userRequestedCourses: string[], majors: string[]) {
-  let masterList: string[][] = [];
-  await expandUserInputViaPrereqs([], userRequestedCourses, masterList);
-  masterList = await Promise.all(masterList.map(async (combination) => await completeSchedule(combination, majors)))
-  let schedules = await Promise.all(masterList.map(async (list) => await scheduleFromCourseList(list)))
-}
-
-
-async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any) {
+function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: string[], masterList: any, allData: any) {
 
   while (coursesToAdd.length > 0) {  //continue until no more courses to take
 
     let course = coursesToAdd.shift() //look at the first course we need to add
     let splitCourse = course!.split('||'); //split the courses so we can check is there is an or
-    let shouldBreak = false;
 
     if (splitCourse.length > 1) {
 
@@ -118,32 +99,19 @@ async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: str
         continue;
       }
       else {
-        const promises: Promise<void>[] = [];
         splitCourse.forEach((course) => {
           let newCourseList = courseList.slice();
           let newCoursesToAdd = coursesToAdd.slice();
           newCoursesToAdd.push(course);
-
-          const promise = new Promise<void>((resolve, reject) => {
-            expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, masterList)
-              .then(() => {
-                resolve(); // Resolve the promise when expandUserInputViaPrereqs completes
-              })
-              .catch((error) => {
-                reject(error); // Reject the promise if an error occurs
-              });
-          });
-
-          promises.push(promise);
+          expandUserInputViaPrereqs(newCourseList, newCoursesToAdd, masterList,allData);         
         });
-        await Promise.all(promises);
         return;
 
       }
     }
     courseList.push(course!)  //add the course to list courses we have process
 
-    const prereqs = await queryPrereqs(course!);     //get the prerequisites for a course.
+    const prereqs = synchronousGetPrereqs(course!,allData);     //get the prerequisites for a course.
 
     prereqs.forEach(prereq => {
       if (!coursesToAdd.includes(prereq) && !courseList.includes(prereq)) {
@@ -154,14 +122,13 @@ async function expandUserInputViaPrereqs(courseList: string[], coursesToAdd: str
   masterList.push(courseList);
 }
 
-
-
-async function completeSchedule(coursesSelectedInput: string[], majors: string[]) {
+async function completeSchedule(coursesSelectedInput: string[], majors: string[],allData: any) {
 
   const coursesForSchedule: string[] = [];
   const coursesLeftToAdd = coursesSelectedInput.slice();
   //array of REQUIRED courses per major
-  const majorRequirements = await Promise.all(majors.map(async (e) => await getMajorRequirements(e)));
+  //const majorRequirements = await Promise.all(majors.map(async (e) => await getMajorRequirements(e)));
+  const majorRequirements = majors.map((e) => synchronousGetMajorReqs(e,allData));
 
   //gets array of courses that can be satisfied by only one course and courses that can be satisfied by multiple courses
   const specific = majorRequirements.map((e) => e[0])
@@ -197,7 +164,7 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   //processes a list based on classes fro m specifics and classes that we need to take based on user input and eliminates all major requirements it can
 
   for (const current of coursesLeftToAdd) {
-    const requirementsSatisfied = await getReqsPerCourse(current);
+    const requirementsSatisfied = synchronousGetReqsPerCourse(current,allData);
     const filteredReqs = requirementsSatisfied.filter((e) => (general).some((e2) => e2.includes(e)))
     
     for (const majorIndex in general) {
@@ -225,7 +192,9 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
     }
     if (!coursesForSchedule.includes(current)) { coursesForSchedule.push(current); }
   }
-  const outOfMajorRecs = await Promise.all(majors.map(async (e) => (await getOutOfMajorRecs(e))[1]));
+
+  const outOfMajorReqs = allData.map((data) => data.outOfMajorReqs)
+  console.log(outOfMajorReqs)
   const filteredOutOfMajor: string[][] = []
   const filteredGeneral: string[][] = []
   
@@ -238,7 +207,7 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   //uses a nested for loop to find each class and then determines if that class is out of major eligible or not. Pushes to corrosponding array
   for (const majorIndex in general) {
     for (const generalClass of general[majorIndex]) {
-      outOfMajorRecs[majorIndex].includes(generalClass) ? filteredOutOfMajor[majorIndex].push(generalClass) : filteredGeneral[majorIndex].push(generalClass)
+      outOfMajorReqs[majorIndex].includes(generalClass) ? filteredOutOfMajor[majorIndex].push(generalClass) : filteredGeneral[majorIndex].push(generalClass)
     }
   }
 
@@ -248,8 +217,8 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
   //remove the reqs it counts for from filteredOutOfMajor
   //add class to schedule
   while (filteredOutOfMajor.some((e) => (e.length > 0))) {
-    let bestCourse = await pickBestCourse(filteredOutOfMajor, majors, majorMap, coursesForSchedule);
-    const requirementsSatisfied = await getReqsPerCourse(bestCourse!)
+    let bestCourse = await pickBestCourse(filteredOutOfMajor, majors, majorMap, coursesForSchedule, allData);
+    const requirementsSatisfied = synchronousGetReqsPerCourse(bestCourse!,allData)
 
     for (const majorIndex in filteredOutOfMajor) {
       const major = majors[majorIndex]
@@ -266,11 +235,6 @@ async function completeSchedule(coursesSelectedInput: string[], majors: string[]
 
   return coursesForSchedule;
 }
-
-
-
-
-
 
 async function randomClassFilling(filteredGeneral: string[][], coursesAlreadyTaken: string[], majors: string[], majorMap: Map<string, string[]>) {
   const coursesAdded: string[] = [];
@@ -314,8 +278,9 @@ async function randomClassFilling(filteredGeneral: string[][], coursesAlreadyTak
   return coursesAdded;
 }
 
-async function pickBestCourse(filteredOutOfMajor: string[][], majors: string[], majorMap: Map<string, string[]>, coursesForSchedule: string[]) {
+async function pickBestCourse(filteredOutOfMajor: string[][], majors: string[], majorMap: Map<string, string[]>, coursesForSchedule: string[], allData: any) {
 
+  const filteredOutOfMajorReqs1 =  filteredOutOfMajor.map((major,acc) => {})
   const filteredOutOfMajorReqs = await Promise.all(
     Array.from(
       new Set(
@@ -330,18 +295,19 @@ async function pickBestCourse(filteredOutOfMajor: string[][], majors: string[], 
       )
     )
   );
+
   const sortedArr = await Promise.all(filteredOutOfMajorReqs.map(async (item) => ({
     item,
-    majorsCount: (await getMajorsPerCourse(item)).length
+    majorsCount: synchronousGetMajorsPerCourse(item,allData).length
   })))
     .then((resultArray) => resultArray.sort((a, b) => (b.majorsCount - a.majorsCount)))
     .then((sortedArray) => sortedArray.map((item) => item.item));
 
   for (const possibleCourse of sortedArr) {
-    const chosenCoursePrereqs = await queryPrereqs(possibleCourse)
+    const chosenCoursePrereqs = synchronousGetPrereqs(possibleCourse,allData)
     const prereqsSatisfied = chosenCoursePrereqs.every((e) => e.split('||').some((split) => coursesForSchedule.includes(split)))
     if (!coursesForSchedule.includes(possibleCourse) && !majorMap.get(possibleCourse) && prereqsSatisfied) {
-      majorMap.set(possibleCourse, await getMajorsPerCourse(possibleCourse))
+      majorMap.set(possibleCourse, synchronousGetMajorsPerCourse(possibleCourse,allData))
       return possibleCourse;
     }
   }
@@ -359,5 +325,49 @@ function pickBestReq(oneMajor: string[], requirementsSatisfied: string[], major:
   return "None";
 }
 
+async function getTotalCreditNumber(schedule: string[][]): Promise<number>{
+  let credits = 0;
+  for(const semester of schedule){
+    for(const course of semester){
+      let courseObj = await queryCourse(course);
+      console.log(courseObj);
+    }
+  }
+  return credits;
+}
 
-//testFunc();
+function synchronousGetPrereqs(course: string, allData: any){
+  let prereqs: string[] = []
+  for(const singleMajorData of allData){
+    const prereqMap = singleMajorData.prereqMap
+    let prereqs = prereqMap.get(course)
+    return prereqs ?? undefined;
+  }
+  return prereqs;
+}
+
+function synchronousGetMajorReqs(major:string, allData: any){
+  for(const singleMajorData of allData){
+    if(major === singleMajorData.major){
+      return singleMajorData.majorRequirements;
+    }
+  }
+}
+
+function synchronousGetReqsPerCourse(course: string, allData: any){
+  let reqs: string[] = []
+  for(const singleMajorData of allData){
+    const reqMap = singleMajorData.courseReqMap
+    let reqs = reqMap.get(course)
+    if(reqs != undefined){return reqs};
+  }
+  return reqs;
+}
+
+function synchronousGetMajorsPerCourse(course: string, allData: any){
+   const majors: string[] = []
+  for(const data of allData){
+    if(data.reqFulfillingCourses.includes(course)){majors.push(data.major)}
+  }
+  return majors
+}

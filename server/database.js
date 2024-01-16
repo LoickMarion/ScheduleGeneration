@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queryCourse = exports.queryEntireMajor = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.getOutOfMajorRecs = exports.getMajorsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = exports.getMajorData = void 0;
+exports.queryCourse = exports.queryEntireMajor = exports.queryPrereqs = exports.getMajorRequirements = exports.getCoursesPerReq = exports.getReqsPerCourse = exports.getOutOfMajorReqs = exports.getMajorsPerCourse = exports.closeDatabase = exports.fetchDataFromDatabase = exports.getMajorData = void 0;
 var course_1 = require("./course");
 //import {sqlite3} from 'sqlite3';
 var sqlite3 = require('sqlite3');
@@ -44,15 +44,18 @@ var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database('./DatabaseDataEntry/courseDatabase.db');
 function getMajorData(major) {
     return __awaiter(this, void 0, void 0, function () {
-        var majorRequirements, majorReqMap, courseReqMap, reqFulfillingCourses, _a, _b, _c, totalCourses, possibleCoursesMap, prereqMap, a;
+        var majorRequirements, outOfMajorReqs, majorReqMap, courseReqMap, reqFulfillingCourses, _a, _b, _c, totalCourses, possibleCoursesMap, prereqMap, output;
         var _this = this;
         return __generator(this, function (_d) {
             switch (_d.label) {
                 case 0: return [4 /*yield*/, getMajorRequirements(major)
-                    //map of each major requirement to coruses it fulfills
+                    //list of out of major reqs
                 ];
                 case 1:
                     majorRequirements = _d.sent();
+                    return [4 /*yield*/, getOutOfMajorReqs(major)];
+                case 2:
+                    outOfMajorReqs = (_d.sent())[1];
                     majorReqMap = new Map();
                     return [4 /*yield*/, Promise.all(majorRequirements.map(function (e) { return __awaiter(_this, void 0, void 0, function () {
                             var _this = this;
@@ -73,7 +76,7 @@ function getMajorData(major) {
                         }); }))
                         //map of each course to the major requirement it fulfills
                     ];
-                case 2:
+                case 3:
                     _d.sent();
                     courseReqMap = new Map();
                     _b = (_a = Array).from;
@@ -92,7 +95,7 @@ function getMajorData(major) {
                                 }
                             });
                         }); }))];
-                case 3:
+                case 4:
                     reqFulfillingCourses = _b.apply(_a, [new (_c.apply(Set, [void 0, (_d.sent()).flat().flat().flat()]))()]);
                     return [4 /*yield*/, Promise.all(reqFulfillingCourses.map(function (course) { return __awaiter(_this, void 0, void 0, function () { var _a, _b, _c; return __generator(this, function (_d) {
                             switch (_d.label) {
@@ -105,10 +108,10 @@ function getMajorData(major) {
                         }); }); }))
                         //list of all courses with data
                     ];
-                case 4:
+                case 5:
                     _d.sent();
                     return [4 /*yield*/, getPrereqs(reqFulfillingCourses)];
-                case 5:
+                case 6:
                     totalCourses = _d.sent();
                     possibleCoursesMap = new Map();
                     return [4 /*yield*/, Promise.all(totalCourses.map(function (classString) { return __awaiter(_this, void 0, void 0, function () {
@@ -127,7 +130,7 @@ function getMajorData(major) {
                                 }
                             });
                         }); }))];
-                case 6:
+                case 7:
                     _d.sent();
                     prereqMap = new Map();
                     return [4 /*yield*/, Promise.all(totalCourses.map(function (course) { return __awaiter(_this, void 0, void 0, function () {
@@ -144,12 +147,10 @@ function getMajorData(major) {
                                 }
                             });
                         }); }))];
-                case 7:
+                case 8:
                     _d.sent();
-                    console.log(prereqMap);
-                    a = { majorRequirements: majorRequirements, majorReqMap: majorReqMap, possibleCoursesMap: possibleCoursesMap, prereqMap: prereqMap };
-                    console.log(a);
-                    return [2 /*return*/, [possibleCoursesMap, prereqMap]]; //totalCourses  // }
+                    output = { major: major, majorRequirements: majorRequirements, outOfMajorReqs: outOfMajorReqs, reqFulfillingCourses: reqFulfillingCourses, majorReqMap: majorReqMap, courseReqMap: courseReqMap, possibleCoursesMap: possibleCoursesMap, prereqMap: prereqMap };
+                    return [2 /*return*/, output];
             }
         });
     });
@@ -305,7 +306,7 @@ function getMajorsPerCourse(course) {
     });
 }
 exports.getMajorsPerCourse = getMajorsPerCourse;
-function getOutOfMajorRecs(major) {
+function getOutOfMajorReqs(major) {
     return __awaiter(this, void 0, void 0, function () {
         var query, courses;
         return __generator(this, function (_a) {
@@ -320,7 +321,7 @@ function getOutOfMajorRecs(major) {
         });
     });
 }
-exports.getOutOfMajorRecs = getOutOfMajorRecs;
+exports.getOutOfMajorReqs = getOutOfMajorReqs;
 function getReqsPerCourse(course) {
     return __awaiter(this, void 0, void 0, function () {
         var query, courses;
