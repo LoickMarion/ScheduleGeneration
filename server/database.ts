@@ -22,7 +22,8 @@ export async function getMajorData(major : string){
   
   //list of out of major reqs
   let outOfMajorReqs = (await getOutOfMajorReqs(major))[1]
-  //map of each major requirement to coruses it fulfills
+
+  //map of each major requirement to courses that fulfills
   const majorReqMap : Map<string,string[]> = new Map()
   await Promise.all(majorRequirements.map(async (e) => await Promise.all(e.map(async (f) => majorReqMap.set(f, await getCoursesPerReq(f))))))
  

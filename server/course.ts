@@ -15,13 +15,20 @@ export class Course {
         this.credits = credits;
     }
 
+    copy(){
+      const newCourse = new Course(this.getMajor(), this.getNumber(),this.getPrereqs().slice(),this.getFall(),this.getSpring(),this.getCredits())
+      return newCourse;
+    }
+    setPrereqs(prereqs:string[]){
+      this.prereqs = prereqs
+    }
     getMajor(){
       return this.major;
     }
     getNumber(){
       return this.number;
     }
-    getPrereq(){
+    getPrereqs(){
       return this.prereqs;
     }
     getFall(){
@@ -46,7 +53,7 @@ export class Course {
     }
 
     hasPrereq(){
-      return this.getPrereq().length != 0;
+      return this.getPrereqs().length != 0;
     }
 }
 
@@ -151,7 +158,7 @@ export class Graph<T>{
 
       if (node !== undefined) {
 
-        const list: string[] = node.getCourse().getPrereq();
+        const list: string[] = node.getCourse().getPrereqs();
         for (const prereq of list) {
 
           const prereqNode = this.nodeMap.get(prereq);
@@ -173,7 +180,7 @@ export class Graph<T>{
   }
 
   prereqsSatisfied(course: string, coursesTaken: string[]){
-    let coursePrereqs: string[] = this.nodeMap.get(course)!.getCourse().getPrereq();
+    let coursePrereqs: string[] = this.nodeMap.get(course)!.getCourse().getPrereqs();
     if(coursePrereqs.length === 0 ){
       return true;
     }
@@ -192,7 +199,7 @@ export class Graph<T>{
     
     
     while (classesToAdd.length > 0){
-
+      //console.log(classesToAdd)
       let creditsInSem = 0;
       let coursesEligibleToTake: string[] = []
       let coursesInSem: string[] = []
@@ -200,7 +207,7 @@ export class Graph<T>{
       for(let i =0;i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken);i++){
         coursesEligibleToTake.push(classesToAdd[i])
       }
-
+      //console.log(coursesEligibleToTake)
       coursesEligibleToTake.sort((a,b) => this.numCoursesUnlockedMap.get(b)! - this.numCoursesUnlockedMap.get(a)!)
       //console.log(coursesEligibleToTake);
 

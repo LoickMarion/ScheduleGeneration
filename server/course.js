@@ -10,13 +10,20 @@ var Course = /** @class */ (function () {
         this.spring = spring;
         this.credits = credits;
     }
+    Course.prototype.copy = function () {
+        var newCourse = new Course(this.getMajor(), this.getNumber(), this.getPrereqs().slice(), this.getFall(), this.getSpring(), this.getCredits());
+        return newCourse;
+    };
+    Course.prototype.setPrereqs = function (prereqs) {
+        this.prereqs = prereqs;
+    };
     Course.prototype.getMajor = function () {
         return this.major;
     };
     Course.prototype.getNumber = function () {
         return this.number;
     };
-    Course.prototype.getPrereq = function () {
+    Course.prototype.getPrereqs = function () {
         return this.prereqs;
     };
     Course.prototype.getFall = function () {
@@ -40,7 +47,7 @@ var Course = /** @class */ (function () {
         return this.major + this.number;
     };
     Course.prototype.hasPrereq = function () {
-        return this.getPrereq().length != 0;
+        return this.getPrereqs().length != 0;
     };
     return Course;
 }());
@@ -121,7 +128,7 @@ var Graph = /** @class */ (function () {
             var course = _a[_i];
             var node = this.nodeMap.get(course);
             if (node !== undefined) {
-                var list = node.getCourse().getPrereq();
+                var list = node.getCourse().getPrereqs();
                 for (var _b = 0, list_1 = list; _b < list_1.length; _b++) {
                     var prereq = list_1[_b];
                     var prereqNode = this.nodeMap.get(prereq);
@@ -140,7 +147,7 @@ var Graph = /** @class */ (function () {
         return this.nodeMap.get(course).getCourse().getCredits() + creditsInSem <= this.creditLimit;
     };
     Graph.prototype.prereqsSatisfied = function (course, coursesTaken) {
-        var coursePrereqs = this.nodeMap.get(course).getCourse().getPrereq();
+        var coursePrereqs = this.nodeMap.get(course).getCourse().getPrereqs();
         if (coursePrereqs.length === 0) {
             return true;
         }
@@ -156,12 +163,14 @@ var Graph = /** @class */ (function () {
         var classesToAdd = this.topoSort();
         var coursesTaken = [];
         while (classesToAdd.length > 0) {
+            //console.log(classesToAdd)
             var creditsInSem = 0;
             var coursesEligibleToTake = [];
             var coursesInSem = [];
             for (var i = 0; i < classesToAdd.length && this.prereqsSatisfied(classesToAdd[i], coursesTaken); i++) {
                 coursesEligibleToTake.push(classesToAdd[i]);
             }
+            //console.log(coursesEligibleToTake)
             coursesEligibleToTake.sort(function (a, b) { return _this.numCoursesUnlockedMap.get(b) - _this.numCoursesUnlockedMap.get(a); });
             //console.log(coursesEligibleToTake);
             for (var _i = 0, coursesEligibleToTake_1 = coursesEligibleToTake; _i < coursesEligibleToTake_1.length; _i++) {
