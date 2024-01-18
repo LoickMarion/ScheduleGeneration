@@ -10,13 +10,14 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
 }
 testFunc()
 async function testFunc() {
-  const testMajors: string[] = ['CS','MATH'];
+  const testMajors: string[] = ['PHYSICS','MATH','CS'];
   const genEDArr: string[] = ['GENED','GENED2'];
   //const genEDArr: string[] = []
 
   const finalMajorArr = testMajors.concat(genEDArr)
-  const testCourses: string[] = ['CS590AB','CS564']
-  const coursesAlreadyTaken: string[] = [];
+  const testCourses: string[] = ['CS590AB','CS564'] //issues when these classes Are out of major
+  //const testCourses: string[] = []
+  const coursesAlreadyTaken: string[] = ['MATH131','MATH132','MATH233','HISTORY115'];
   const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
   const creditLimit = 17;
   let schedule = generateSchedule(coursesAlreadyTaken,testCourses, finalMajorArr,allData,creditLimit);
@@ -29,7 +30,7 @@ function generateSchedule(coursesTaken: string[],userRequestedCourses: string[],
   let masterList: string[][] = [];
   expandUserInputViaPrereqs([], userRequestedCourses, masterList,allData);
   let completedSchedules:string[][][] = []
-  let coursesAlreadyTaken = ['MATH131','MATH132']
+  let coursesAlreadyTaken = []
   masterList.forEach((list) => {
   const b: string[][] = generateSingleSchedule(coursesAlreadyTaken,list,majors,allData,creditLimit);
   completedSchedules.push(b)})
@@ -58,7 +59,9 @@ function scheduleFromCourseList(classesInSchedule: string[], allData: any,credit
   const classList: Course[] = [];
 
   classesInSchedule.forEach((classString) => {
+    console.log(classString)
     const course = synchronousGetCourse(classString, allData);
+    console.log(course)
     const courseCopy = course.copy()
     classList.push(courseCopy);
   }); 

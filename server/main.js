@@ -52,11 +52,12 @@ function testFunc() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    testMajors = ['CS', 'MATH'];
+                    testMajors = ['PHYSICS', 'MATH', 'CS'];
                     genEDArr = ['GENED', 'GENED2'];
                     finalMajorArr = testMajors.concat(genEDArr);
-                    testCourses = ['CS590AB', 'CS564'];
-                    coursesAlreadyTaken = [];
+                    testCourses = ['CS590AB', 'CS564'] //issues when these classes Are out of major
+                    ;
+                    coursesAlreadyTaken = ['MATH131', 'MATH132', 'MATH233', 'HISTORY115'];
                     return [4 /*yield*/, Promise.all(finalMajorArr.map(function (major) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, (0, database_1.getMajorData)(major)];
@@ -77,7 +78,7 @@ function generateSchedule(coursesTaken, userRequestedCourses, majors, allData, c
     var masterList = [];
     expandUserInputViaPrereqs([], userRequestedCourses, masterList, allData);
     var completedSchedules = [];
-    var coursesAlreadyTaken = ['MATH131', 'MATH132'];
+    var coursesAlreadyTaken = [];
     masterList.forEach(function (list) {
         var b = generateSingleSchedule(coursesAlreadyTaken, list, majors, allData, creditLimit);
         completedSchedules.push(b);
@@ -101,7 +102,9 @@ function scheduleFromCourseList(classesInSchedule, allData, creditLimit, courses
     var nodeMap = new Map();
     var classList = [];
     classesInSchedule.forEach(function (classString) {
+        console.log(classString);
         var course = synchronousGetCourse(classString, allData);
+        console.log(course);
         var courseCopy = course.copy();
         classList.push(courseCopy);
     });
