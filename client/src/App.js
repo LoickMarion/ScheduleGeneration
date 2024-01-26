@@ -1,15 +1,12 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { useEffect, useState } from 'react';
+import { completeSchedule }from '../../server/main'
+
+
 
 function App() {
-  const [message, setMessage] = useState('');
-  useEffect(() => {
-    fetch('http://localhost:5000')
-      .then((res) => res.text())
-      .then((data) => setMessage(data))
-      .catch((err) => console.log(err));
-  }, []);
+
   return (
     <div>
       <h1>{message}</h1>
@@ -17,3 +14,4 @@ function App() {
   );
 }
 export default App;
+ 
