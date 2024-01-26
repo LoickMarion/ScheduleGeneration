@@ -23,7 +23,7 @@ async function testFunc() {
  
 }  
 
-async function generateSchedule(coursesTaken: string[],userRequestedCourses: string[], majors: string[], allData: any) {
+export async function generateSchedule(coursesTaken: string[],userRequestedCourses: string[], majors: string[], allData: any) {
   let masterList: string[][] = [];
   expandUserInputViaPrereqs([], userRequestedCourses, masterList,allData);
   let b = await completeSchedule(masterList[0],majors,allData)
