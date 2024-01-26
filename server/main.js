@@ -77,7 +77,7 @@ function generateSchedule(coursesTaken, userRequestedCourses, majors, allData, c
     var masterList = [];
     expandUserInputViaPrereqs([], userRequestedCourses, masterList, allData);
     var completedSchedules = [];
-    var coursesAlreadyTaken = ['MATH131', 'MATH132'];
+    var coursesAlreadyTaken = [];
     masterList.forEach(function (list) {
         var b = generateSingleSchedule(coursesAlreadyTaken, list, majors, allData, creditLimit);
         completedSchedules.push(b);

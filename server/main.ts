@@ -29,7 +29,7 @@ function generateSchedule(coursesTaken: string[],userRequestedCourses: string[],
   let masterList: string[][] = [];
   expandUserInputViaPrereqs([], userRequestedCourses, masterList,allData);
   let completedSchedules:string[][][] = []
-  let coursesAlreadyTaken = ['MATH131','MATH132']
+  let coursesAlreadyTaken = []
   masterList.forEach((list) => {
   const b: string[][] = generateSingleSchedule(coursesAlreadyTaken,list,majors,allData,creditLimit);
   completedSchedules.push(b)})
