@@ -35,7 +35,7 @@ async function testFunc() {
     const major: string = await fetchSelectedPrimaryMajor();
     //const major = 'MATH'
     const finalMajorArr = ['GENED','GENED2'].concat(major)
-    const testCourses: string[] = ['CS590AB','CS564']
+    const testCourses: string[] = []
     const coursesAlreadyTaken: string[] = [];
     const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
     const creditLimit = 17;
