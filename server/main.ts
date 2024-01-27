@@ -2,17 +2,10 @@ import { Course, Node, Graph } from "./course";
 import { getMajorData } from "./database";
 import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
 import axios from 'axios';
+module.exports = { testFunc: testFunc }
 
-function wait(ms: number): Promise<void> { //Use for test, can delete at end
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+
 testFunc()
-
-module.exports = {
-  testFunc: testFunc
-}
 
 function schedToJSON(schedule: string[][]) {
   var jsonObject: any = {};
@@ -21,10 +14,10 @@ function schedToJSON(schedule: string[][]) {
     const subObject: any = {}; // Initialize an empty object for each subArray
 
     subArray.forEach(function (item, itemIndex) {
-      subObject["Course" + (itemIndex + 1)] = item;
+      subObject["Course " + (itemIndex + 1)] = item;
     });
 
-    jsonObject["Semester" + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+    jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
   });
 
   return JSON.stringify(jsonObject, null, 2);
@@ -32,9 +25,12 @@ function schedToJSON(schedule: string[][]) {
 
 async function testFunc() {
   try {
-    const major: string = await fetchSelectedPrimaryMajor();
-    //const major = 'MATH'
-    const finalMajorArr = ['GENED','GENED2'].concat(major)
+    const data = await fetchData();
+    const selectedMajors = [data.primary]
+    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
+    data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor")
+    const finalMajorArr = ['GENED','GENED2'].concat(selectedMajors)
+    console.log(finalMajorArr)
     const testCourses: string[] = []
     const coursesAlreadyTaken: string[] = [];
     const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
@@ -47,16 +43,12 @@ async function testFunc() {
   }
 }  
 
-async function fetchSelectedPrimaryMajor() {
+async function fetchData() {
   try {
-    const response = await axios.get('http://localhost:5000/selected-primary-major');
-    const selectedPrimaryMajor = response.data.selectedPrimaryMajor;
-    console.log('Selected Primary Major:', selectedPrimaryMajor);
-    return selectedPrimaryMajor;
+    const response = await axios.get('http://localhost:5000/selected-data');
+    return response.data.selectedData;
   } catch (error) {
-    console.error('Error fetching selected primary major:', error.message);
-    // Handle error appropriately
-    throw error; // Rethrow the error to propagate it
+    console.error('Error fetching selected data:', error.message);
   }
 }
 

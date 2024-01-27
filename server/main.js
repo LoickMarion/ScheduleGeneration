@@ -40,39 +40,36 @@ var course_1 = require("./course");
 var database_1 = require("./database");
 var majorPriorityArrays = require("./DatabaseDataEntry/majorPriorityArrays.json");
 var axios_1 = require("axios");
-function wait(ms) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, ms);
-    });
-}
+module.exports = { testFunc: testFunc };
 testFunc();
-module.exports = {
-    testFunc: testFunc
-};
 function schedToJSON(schedule) {
     var jsonObject = {};
     schedule.forEach(function (subArray, index) {
         var subObject = {}; // Initialize an empty object for each subArray
         subArray.forEach(function (item, itemIndex) {
-            subObject["Course" + (itemIndex + 1)] = item;
+            subObject["Course " + (itemIndex + 1)] = item;
         });
-        jsonObject["Semester" + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+        jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
     });
     return JSON.stringify(jsonObject, null, 2);
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var major, finalMajorArr, testCourses, coursesAlreadyTaken, allData, creditLimit, schedule, error_1;
+        var data, selectedMajors, finalMajorArr, testCourses, coursesAlreadyTaken, allData, creditLimit, schedule, error_1;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, fetchSelectedPrimaryMajor()];
+                    return [4 /*yield*/, fetchData()];
                 case 1:
-                    major = _a.sent();
-                    finalMajorArr = ['GENED', 'GENED2'].concat(major);
-                    testCourses = ['CS590AB', 'CS564'];
+                    data = _a.sent();
+                    selectedMajors = [data.primary];
+                    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
+                    data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor");
+                    finalMajorArr = ['GENED', 'GENED2'].concat(selectedMajors);
+                    console.log(finalMajorArr);
+                    testCourses = [];
                     coursesAlreadyTaken = [];
                     return [4 /*yield*/, Promise.all(finalMajorArr.map(function (major) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -95,24 +92,21 @@ function testFunc() {
         });
     });
 }
-function fetchSelectedPrimaryMajor() {
+function fetchData() {
     return __awaiter(this, void 0, void 0, function () {
-        var response, selectedPrimaryMajor, error_2;
+        var response, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, axios_1.default.get('http://localhost:5000/selected-primary-major')];
+                    return [4 /*yield*/, axios_1.default.get('http://localhost:5000/selected-data')];
                 case 1:
                     response = _a.sent();
-                    selectedPrimaryMajor = response.data.selectedPrimaryMajor;
-                    console.log('Selected Primary Major:', selectedPrimaryMajor);
-                    return [2 /*return*/, selectedPrimaryMajor];
+                    return [2 /*return*/, response.data.selectedData];
                 case 2:
                     error_2 = _a.sent();
-                    console.error('Error fetching selected primary major:', error_2.message);
-                    // Handle error appropriately
-                    throw error_2; // Rethrow the error to propagate it
+                    console.error('Error fetching selected data:', error_2.message);
+                    return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
         });

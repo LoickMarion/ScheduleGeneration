@@ -1,38 +1,98 @@
-.App {
+/* Reset default styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+/* Container styles */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+}
+
+/* Heading styles */
+h2 {
+  font-size: 36px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Form element styles */
+select,
+button {
+  font-size: 16px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+  margin-bottom: 10px;
+  cursor: pointer; /* Cursor pointer for buttons */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* List styles */
+ul {
+  list-style-type: none;
+  padding: 0;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+li {
+  margin-bottom: 5px;
 }
 
-.App-link {
-  color: #61dafb;
+/* Option styles */
+option {
+  background-color: #333;
+  color: #fff;
 }
 
-@keyframes App-logo-spin {
+/* Schedule styles */
+.schedule {
+  background-color: #333;
+  padding: 20px;
+  border-radius: 10px;
+  animation: fadeIn 1s ease; /* Fade-in animation */
+}
+
+.schedule h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+/* Define animation keyframes */
+@keyframes fadeIn {
   from {
-    transform: rotate(0deg);
+    opacity: 0;
   }
   to {
-    transform: rotate(360deg);
+    opacity: 1;
   }
+}
+
+/* Animation for select container */
+.select-container {
+  animation: slideInRight 1s ease; /* Slide-in animation */
+}
+
+/* Define animation keyframes */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0%);
+    opacity: 1;
+  }
+}
+
+/* Smooth transition for select styles */
+.select-style {
+  transition: all 0.3s ease;
 }
