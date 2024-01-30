@@ -39,23 +39,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var course_1 = require("./course");
 var database_1 = require("./database");
 var majorPriorityArrays = require("./DatabaseDataEntry/majorPriorityArrays.json");
-function wait(ms) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, ms);
-    });
-}
+var axios_1 = require("axios");
+module.exports = { testFunc: testFunc };
 testFunc();
+function schedToJSON(schedule) {
+    var jsonObject = {};
+    schedule.forEach(function (subArray, index) {
+        var subObject = {}; // Initialize an empty object for each subArray
+        subArray.forEach(function (item, itemIndex) {
+            subObject["Course " + (itemIndex + 1)] = item;
+        });
+        jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+    });
+    return JSON.stringify(jsonObject, null, 2);
+}
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var testMajors, genEDArr, finalMajorArr, testCourses, coursesAlreadyTaken, allData, creditLimit, schedule;
+        var data, selectedMajors, finalMajorArr, testCourses, coursesAlreadyTaken, allData, creditLimit, schedule, error_1;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    testMajors = ['CS', 'MATH'];
-                    genEDArr = ['GENED', 'GENED2'];
-                    finalMajorArr = testMajors.concat(genEDArr);
-                    testCourses = ['CS590AB', 'CS564'];
+                    _a.trys.push([0, 3, , 4]);
+                    return [4 /*yield*/, fetchData()];
+                case 1:
+                    data = _a.sent();
+                    selectedMajors = [data.primary];
+                    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
+                    data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor");
+                    finalMajorArr = ['GENED', 'GENED2'].concat(selectedMajors);
+                    console.log(finalMajorArr);
+                    testCourses = [];
                     coursesAlreadyTaken = [];
                     return [4 /*yield*/, Promise.all(finalMajorArr.map(function (major) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                             switch (_a.label) {
@@ -63,12 +77,37 @@ function testFunc() {
                                 case 1: return [2 /*return*/, _a.sent()];
                             }
                         }); }); }))];
-                case 1:
+                case 2:
                     allData = _a.sent();
                     creditLimit = 17;
                     schedule = generateSchedule(coursesAlreadyTaken, testCourses, finalMajorArr, allData, creditLimit);
                     console.log(schedule);
-                    return [2 /*return*/];
+                    return [2 /*return*/, schedToJSON(schedule)];
+                case 3:
+                    error_1 = _a.sent();
+                    console.error('Error:', error_1);
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+function fetchData() {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, axios_1.default.get('http://localhost:5000/selected-data')];
+                case 1:
+                    response = _a.sent();
+                    return [2 /*return*/, response.data.selectedData];
+                case 2:
+                    error_2 = _a.sent();
+                    console.error('Error fetching selected data:', error_2.message);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -102,8 +141,13 @@ function scheduleFromCourseList(classesInSchedule, allData, creditLimit, courses
     var classList = [];
     classesInSchedule.forEach(function (classString) {
         var course = synchronousGetCourse(classString, allData);
-        var courseCopy = course.copy();
-        classList.push(courseCopy);
+        if (!course) {
+            console.log("Course is undefined");
+        }
+        else {
+            var courseCopy = course.copy();
+            classList.push(courseCopy);
+        }
     });
     classList.forEach(function (course) {
         var prereqs = course.getPrereqs();
@@ -210,7 +254,6 @@ function completeSchedule(coursesAlreadyTaken, coursesSelectedInput, majors, all
                     majorMap.set(current, tempArr);
                 }
                 else {
-                    majorMap.set(current, [major]);
                 }
             }
             ;
@@ -398,8 +441,9 @@ function synchronousGetCoursesPerReq(req, allData) {
 function synchronousGetCourse(courseName, allData) {
     for (var _i = 0, allData_6 = allData; _i < allData_6.length; _i++) {
         var data = allData_6[_i];
-        if (data.possibleCoursesMap.get(courseName) != undefined) {
-            return data.possibleCoursesMap.get(courseName);
+        if (data.possibleCoursesMap.has(courseName)) {
+            var returnedCourseName = data.possibleCoursesMap.get(courseName);
+            return returnedCourseName;
         }
     }
 }

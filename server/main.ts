@@ -1,38 +1,66 @@
-import { get } from "http";
 import { Course, Node, Graph } from "./course";
-import { getReqsPerCourse, getCoursesPerReq, queryPrereqs, getMajorRequirements, queryCourse, getOutOfMajorReqs, getMajorsPerCourse, queryEntireMajor, getMajorData, returnedData } from "./database";
+import { getMajorData } from "./database";
 import * as majorPriorityArrays from "./DatabaseDataEntry/majorPriorityArrays.json";
+import axios from 'axios';
+module.exports = { testFunc: testFunc }
 
-function wait(ms: number): Promise<void> { //Use for test, can delete at end
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
+
 
 testFunc()
-async function testFunc() {
-  const testMajors: string[] = ['CS','MATH'];
-  const genEDArr: string[] = ['GENED','GENED2'];
-  //const genEDArr: string[] = []
 
-  const finalMajorArr = testMajors.concat(genEDArr)
-  const testCourses: string[] = ['CS590AB','CS564']
-  const coursesAlreadyTaken: string[] = [];
-  const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
-  const creditLimit = 17;
-  let schedule = generateSchedule(coursesAlreadyTaken,testCourses, finalMajorArr,allData,creditLimit);
-  console.log(schedule)
-  
- 
+function schedToJSON(schedule: string[][]) {
+  var jsonObject: any = {};
+
+  schedule.forEach(function (subArray, index) {
+    const subObject: any = {}; // Initialize an empty object for each subArray
+
+    subArray.forEach(function (item, itemIndex) {
+      subObject["Course " + (itemIndex + 1)] = item;
+    });
+
+    jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+  });
+
+  return JSON.stringify(jsonObject, null, 2);
+}
+
+async function testFunc() {
+  try {
+    const data = await fetchData();
+    const selectedMajors = [data.primary]
+    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
+    data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor")
+    const finalMajorArr = ['GENED','GENED2'].concat(selectedMajors)
+    console.log(finalMajorArr)
+    const testCourses: string[] = []
+    const coursesAlreadyTaken: string[] = [];
+    const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
+    const creditLimit = 17;
+    let schedule = generateSchedule(coursesAlreadyTaken,testCourses,finalMajorArr,allData,creditLimit);
+    console.log(schedule)
+    return schedToJSON(schedule)
+  } catch (error) {
+    console.error('Error:', error);
+  }
 }  
+
+async function fetchData() {
+  try {
+    const response = await axios.get('http://localhost:5000/selected-data');
+    return response.data.selectedData;
+  } catch (error) {
+    console.error('Error fetching selected data:', error.message);
+  }
+}
 
 function generateSchedule(coursesTaken: string[],userRequestedCourses: string[], majors: string[], allData: any,creditLimit:number) {
   let masterList: string[][] = [];
-  expandUserInputViaPrereqs([], userRequestedCourses, masterList,allData);
+  expandUserInputViaPrereqs([], userRequestedCourses, masterList, allData);
   let completedSchedules:string[][][] = []
   let coursesAlreadyTaken = []
   masterList.forEach((list) => {
   const b: string[][] = generateSingleSchedule(coursesAlreadyTaken,list,majors,allData,creditLimit);
+  
   completedSchedules.push(b)})
   completedSchedules.sort((a,b)=> -1000 * (b.length-a.length) - (getTotalCreditNumber(b,allData)-getTotalCreditNumber(a,allData)))
 
@@ -43,13 +71,15 @@ function generateSchedule(coursesTaken: string[],userRequestedCourses: string[],
 function generateSingleSchedule(coursesAlreadyTaken: string[],list: string[], majors: string[], allData:any,creditLimit:number){
  // console.log('iteration')
   // console.log(list)
+
   let completedSchedule = completeSchedule(coursesAlreadyTaken,list,majors,allData);
   // console.log(completedSchedule)
+  
   let finishedSchedule = scheduleFromCourseList(completedSchedule,allData,creditLimit,coursesAlreadyTaken);
   // console.log(finishedSchedule)
   // console.log(getTotalCreditNumber(finishedSchedule,allData))
   // console.log('\n')
-
+  
   return finishedSchedule
 }
 
@@ -57,11 +87,14 @@ function scheduleFromCourseList(classesInSchedule: string[], allData: any,credit
   const classMap = new Map<string, Course>();
   let nodeMap = new Map<string, Node<Course>>();
   const classList: Course[] = [];
-
   classesInSchedule.forEach((classString) => {
     const course = synchronousGetCourse(classString, allData);
-    const courseCopy = course.copy()
-    classList.push(courseCopy);
+    if(!course) { 
+      console.log("Course is undefined"); 
+    } else {
+      const courseCopy = course.copy()
+      classList.push(courseCopy);
+    }
   }); 
 
   classList.forEach((course) => {
@@ -167,13 +200,14 @@ function completeSchedule(coursesAlreadyTaken:string[],coursesSelectedInput: str
     const filteredReqs = requirementsSatisfied.filter((e) => (general).some((e2) => e2.includes(e)))
 
      
-
+   
     //loops through all majors and checks if a course can satisfy something
     for (const majorIndex in general) {
       const major = majors[majorIndex]
-
+  
       //if course already being used for this major, skip
       if (majorMap.get(current) && majorMap.get(current)!.includes(major)) {
+
         continue;
       }
 
@@ -188,13 +222,15 @@ function completeSchedule(coursesAlreadyTaken:string[],coursesSelectedInput: str
         if (tempArr) {
           tempArr.push(major)
           majorMap.set(current, tempArr)
+
         }
         else {
-          majorMap.set(current, [major])
+
         }
       };
     }
     if (!coursesForSchedule.includes(current)) { coursesForSchedule.push(current); }
+  
   }
 
   const outOfMajorReqs = allData.map((data) => data.outOfMajorReqs.slice())
@@ -366,6 +402,9 @@ function synchronousGetCoursesPerReq(req: string, allData: any){
 
 function synchronousGetCourse(courseName: string, allData: any){
   for(const data of allData){
-    if(data.possibleCoursesMap.get(courseName) != undefined){ return data.possibleCoursesMap.get(courseName)}
+    if (data.possibleCoursesMap.has(courseName)) {
+      let returnedCourseName = data.possibleCoursesMap.get(courseName);
+      return returnedCourseName;
+    }
   }
 }
