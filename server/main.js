@@ -99,7 +99,7 @@ function fetchData() {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, axios_1.default.get('http://localhost:5000/selected-data')];
+                    return [4 /*yield*/, axios_1.default.get('http://localhost:5001/selected-data')];
                 case 1:
                     response = _a.sent();
                     return [2 /*return*/, response.data.selectedData];

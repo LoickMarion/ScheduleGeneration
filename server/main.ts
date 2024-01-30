@@ -46,7 +46,7 @@ async function testFunc() {
 
 async function fetchData() {
   try {
-    const response = await axios.get('http://localhost:5000/selected-data');
+    const response = await axios.get('http://localhost:5001/selected-data');
     return response.data.selectedData;
   } catch (error) {
     console.error('Error fetching selected data:', error.message);

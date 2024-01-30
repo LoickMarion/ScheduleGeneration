@@ -5,7 +5,7 @@ function FetchData({children}){
   const [backendData, setBackendData] = useState();
 
   useEffect(() => {
-    fetch("http://localhost:5000/").then(
+    fetch("http://localhost:5001/").then(
       response => response.json()
     ).then(
       data => {
@@ -22,7 +22,7 @@ function FetchData({children}){
 function ResetButton() {
   const handleReset = async () => {
     try {
-      const response = await fetch('http://localhost:5000/reset-majors', {
+      const response = await fetch('http://localhost:5001/reset-majors', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ function PrimaryMajorMenu() {
 
   const sendSelectedPrimaryMajor = async (primaryMajor) => {
     try {
-      const response = await fetch('http://localhost:5000/selected-data', {
+      const response = await fetch('http://localhost:5001/selected-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ function SecondaryMajorMenu(){
 
   const sendSelectedSecondaryMajor = async (secondaryMajor) => {
     try {
-      const response = await fetch('http://localhost:5000/selected-data', {
+      const response = await fetch('http://localhost:5001/selected-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ function MinorMenu(){
 
   const sendSelectedMinor = async (minor) => {
     try {
-      const response = await fetch('http://localhost:5000/selected-data', {
+      const response = await fetch('http://localhost:5001/selected-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
