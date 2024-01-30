@@ -8,6 +8,7 @@ function wait(ms: number): Promise<void> { //Use for test, can delete at end
     setTimeout(resolve, ms);
   });
 }
+
 testFunc()
 async function testFunc() {
   const testMajors: string[] = ['CS','MATH'];
