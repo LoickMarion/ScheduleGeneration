@@ -9,7 +9,6 @@ function FetchData({children}){
       response => response.json()
     ).then(
       data => {
-        console.log(data); 
         setBackendData(data);
       }
     ).catch(error => {
@@ -34,7 +33,6 @@ function ResetButton() {
         throw new Error('Failed to reset majors');
       }
       window.location.reload()
-      // You may want to trigger a reload of the fetched data or handle it accordingly
     } catch (error) {
       console.error('Error resetting majors:', error);
     }
@@ -46,10 +44,9 @@ function ResetButton() {
 }
 
 function PrimaryMajorMenu() {
-  // Define state to manage the selected value
+
   const [selectedPrimaryMajor, setSelectedPrimaryMajor] = useState('');
 
-  // Event handler to handle changes in the dropdown selection
   const handleSelectChange = (event) => {
     setSelectedPrimaryMajor(event.target.value);
     sendSelectedPrimaryMajor(event.target.value)
