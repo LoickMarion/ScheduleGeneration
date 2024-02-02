@@ -419,6 +419,48 @@ function MinorMenu(){
   );
 }
 
+function CreditSlider(){
+  const [selectedCredits, setSelectedCredits] = useState(12)
+
+  const handleSelectChange = (event) => {
+    const credits = parseInt(event.target.value, 10);
+    setSelectedCredits(credits)
+    sendSelectedCredits(credits)
+  }
+
+  const sendSelectedCredits = async (credits) => {
+    try {
+      const response = await fetch('http://localhost:5001/selected-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ credits }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send selected credits to the backend');
+      }
+    } catch (error) {
+      console.error('Error sending selected credits to the backend:', error);
+    }
+  };
+
+  return (
+    <div>
+    <input
+      type="range"
+      min="0"
+      max="19"
+      value={selectedCredits}
+      onChange={handleSelectChange}
+    />
+    <span>{selectedCredits}</span>
+  </div>
+
+  )
+}
+
 function App() {
 
   return (
@@ -427,6 +469,7 @@ function App() {
       <PrimaryMajorMenu />
       <SecondaryMajorMenu />
       <MinorMenu />
+      <CreditSlider/>
       <button onClick={() => window.location.reload()}>Submit</button>
       <ResetButton />
         <div className='container'>

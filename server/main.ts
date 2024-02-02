@@ -35,7 +35,8 @@ async function testFunc() {
     const testCourses: string[] = []
     const coursesAlreadyTaken: string[] = [];
     const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
-    const creditLimit = 17;
+    const creditLimit = data.credits;
+    console.log(typeof data.credits)
     let schedule = generateSchedule(coursesAlreadyTaken,testCourses,finalMajorArr,allData,creditLimit);
     console.log(schedule)
     return schedToJSON(schedule)

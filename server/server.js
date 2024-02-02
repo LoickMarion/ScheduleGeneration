@@ -9,7 +9,8 @@ const port = 5001;
 let selectedData = {
   primary: null,
   secondary: null,
-  minor: null
+  minor: null,
+  credits: 12
 };
 
 
@@ -30,12 +31,18 @@ app.get('/', async (req, res) => {
 app.post('/selected-data', (req, res) => {
   try {
     console.log(req.body)
-    const { primaryMajor, secondaryMajor } = req.body;
+    const { primaryMajor, secondaryMajor, minor, credits } = req.body;
     if (primaryMajor !== undefined) {
       selectedData.primary = primaryMajor;
     }
     if (secondaryMajor !== undefined) {
       selectedData.secondary = secondaryMajor;
+    }
+    if (minor !== undefined){
+      selectedData.minor = minor;
+    }
+    if(credits !== undefined){
+      selectedData.credits = credits;
     }
     console.log('Received selected data:', selectedData);
     res.status(200).send('Received selected major successfully');
@@ -65,7 +72,8 @@ app.post('/reset-majors', (req, res) => {
     selectedData = {
       primary: null,
       secondary: null,
-      minor: null
+      minor: null,
+      credits: null
     };
     console.log('Selected majors reset successfully');
     res.status(200).send('Selected majors reset successfully');

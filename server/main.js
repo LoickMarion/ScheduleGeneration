@@ -79,7 +79,8 @@ function testFunc() {
                         }); }); }))];
                 case 2:
                     allData = _a.sent();
-                    creditLimit = 17;
+                    creditLimit = data.credits;
+                    console.log(typeof data.credits);
                     schedule = generateSchedule(coursesAlreadyTaken, testCourses, finalMajorArr, allData, creditLimit);
                     console.log(schedule);
                     return [2 /*return*/, schedToJSON(schedule)];
