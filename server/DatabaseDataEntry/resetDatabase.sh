@@ -22,4 +22,4 @@ for file in *.js; do
     node "$file"
 done
 
-read -p "Press enter to exit"
+read -p "Press return to continue . . ."
