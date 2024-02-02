@@ -74,9 +74,9 @@ function PrimaryMajorMenu() {
     <div className='select-container'>
       <select value={selectedPrimaryMajor} onChange={handleSelectChange} className="select-style">
         <option value="Please select a major first!">Select your primary major!</option>
-        <option value="Accounting">Accounting</option>
-        <option value="Afro-American Studies">Afro-American Studies</option>
-        <option value="Animal Science, Animal Biotechnology, and Biomedical Sciences">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
+        <option value="ACCOUNTG">Accounting</option>
+        <option value="AFROAM">Afro-American Studies</option>
+        <option value="ANIMLSCI">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
         <option value="Anthropology">Anthropology</option>
         <option value="Arboriculture and Community Forest Management">Arboriculture and Community Forest Management</option>
         <option value="Architecture">Architecture</option>
@@ -86,7 +86,7 @@ function PrimaryMajorMenu() {
         <option value="Astronomy">Astronomy</option>
         <option value="Bachelor’s Degree with Individual Concentration (BDIC)">Bachelor’s Degree with Individual Concentration (BDIC)</option>
         <option value="Biochemistry and Molecular Biology">Biochemistry and Molecular Biology</option>
-        <option value="Biology">Biology</option>
+        <option value="BIOLOGY">Biology</option>
         <option value="Biomedical Engineering">Biomedical Engineering</option>
         <option value="Building and Construction Technology">Building and Construction Technology</option>
         <option value="Chemical Engineering">Chemical Engineering</option>
@@ -112,7 +112,7 @@ function PrimaryMajorMenu() {
         <option value="Geology">Geology</option>
         <option value="Geosciences">Geosciences</option>
         <option value="German and Scandinavian Studies">German and Scandinavian Studies</option>
-        <option value="History">History</option>
+        <option value="HISTORY">History</option>
         <option value="History of Art and Architecture">History of Art and Architecture</option>
         <option value="Horticultural Science">Horticultural Science</option>
         <option value="Hospitality and Tourism Management">Hospitality and Tourism Management</option>
@@ -199,9 +199,9 @@ function SecondaryMajorMenu(){
     <div className='select-container'>
         <select value={selectedSecondaryMajor} onChange={handleSelectChange} className="select-style">
         <option value="Please select an option first!">If applicable, choose a second major</option>
-        <option value="Accounting">Accounting</option>
-        <option value="Afro-American Studies">Afro-American Studies</option>
-        <option value="Animal Science, Animal Biotechnology, and Biomedical Sciences">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
+        <option value="ACCOUNTG">Accounting</option>
+        <option value="AFROAM">Afro-American Studies</option>
+        <option value="ANIMLSCI">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
         <option value="Anthropology">Anthropology</option>
         <option value="Arboriculture and Community Forest Management">Arboriculture and Community Forest Management</option>
         <option value="Architecture">Architecture</option>
@@ -211,7 +211,7 @@ function SecondaryMajorMenu(){
         <option value="Astronomy">Astronomy</option>
         <option value="Bachelor’s Degree with Individual Concentration (BDIC)">Bachelor’s Degree with Individual Concentration (BDIC)</option>
         <option value="Biochemistry and Molecular Biology">Biochemistry and Molecular Biology</option>
-        <option value="Biology">Biology</option>
+        <option value="BIOLOGY">Biology</option>
         <option value="Biomedical Engineering">Biomedical Engineering</option>
         <option value="Building and Construction Technology">Building and Construction Technology</option>
         <option value="Chemical Engineering">Chemical Engineering</option>
@@ -237,7 +237,7 @@ function SecondaryMajorMenu(){
         <option value="Geology">Geology</option>
         <option value="Geosciences">Geosciences</option>
         <option value="German and Scandinavian Studies">German and Scandinavian Studies</option>
-        <option value="History">History</option>
+        <option value="HISTORY">History</option>
         <option value="History of Art and Architecture">History of Art and Architecture</option>
         <option value="Horticultural Science">Horticultural Science</option>
         <option value="Hospitality and Tourism Management">Hospitality and Tourism Management</option>
@@ -324,9 +324,9 @@ function MinorMenu(){
     <div className='select-container'>
         <select value={selectedMinor} onChange={handleSelectChange} className="select-style">
         <option value="Please select an option first!">If applicable, choose a minor</option>
-        <option value="Accounting">Accounting</option>
-        <option value="Afro-American Studies">Afro-American Studies</option>
-        <option value="Animal Science, Animal Biotechnology, and Biomedical Sciences">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
+        <option value="ACCOUNTG">Accounting</option>
+        <option value="AFROAM">Afro-American Studies</option>
+        <option value="ANIMLSCI">Animal Science, Animal Biotechnology, and Biomedical Sciences</option>
         <option value="Anthropology">Anthropology</option>
         <option value="Arboriculture and Community Forest Management">Arboriculture and Community Forest Management</option>
         <option value="Architecture">Architecture</option>
@@ -336,7 +336,7 @@ function MinorMenu(){
         <option value="Astronomy">Astronomy</option>
         <option value="Bachelor’s Degree with Individual Concentration (BDIC)">Bachelor’s Degree with Individual Concentration (BDIC)</option>
         <option value="Biochemistry and Molecular Biology">Biochemistry and Molecular Biology</option>
-        <option value="Biology">Biology</option>
+        <option value="BIOLOGY">Biology</option>
         <option value="Biomedical Engineering">Biomedical Engineering</option>
         <option value="Building and Construction Technology">Building and Construction Technology</option>
         <option value="Chemical Engineering">Chemical Engineering</option>
@@ -362,7 +362,7 @@ function MinorMenu(){
         <option value="Geology">Geology</option>
         <option value="Geosciences">Geosciences</option>
         <option value="German and Scandinavian Studies">German and Scandinavian Studies</option>
-        <option value="History">History</option>
+        <option value="HISTORY">History</option>
         <option value="History of Art and Architecture">History of Art and Architecture</option>
         <option value="Horticultural Science">Horticultural Science</option>
         <option value="Hospitality and Tourism Management">Hospitality and Tourism Management</option>
@@ -450,7 +450,7 @@ function CreditSlider(){
     <div>
     <input
       type="range"
-      min="0"
+      min="12"
       max="19"
       value={selectedCredits}
       onChange={handleSelectChange}

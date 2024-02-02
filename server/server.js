@@ -73,7 +73,7 @@ app.post('/reset-majors', (req, res) => {
       primary: null,
       secondary: null,
       minor: null,
-      credits: null
+      credits: 12
     };
     console.log('Selected majors reset successfully');
     res.status(200).send('Selected majors reset successfully');

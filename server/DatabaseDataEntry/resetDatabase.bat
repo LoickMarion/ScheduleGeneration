@@ -18,4 +18,11 @@ for %%i in (*.js) do (
     node %%i
 )
 
+cd ../addMinors
+
+for %%i in (*.js) do (
+    echo Running %%i
+    node %%i
+)
+
 pause
