@@ -461,6 +461,42 @@ function CreditSlider(){
   )
 }
 
+function PrevTakenCourses() {
+  const [selectedCourses, setSelectedCourses] = useState([]);
+
+  const handleSelectChange = async (event) => {
+    if (event.key === 'Enter') {
+      const takenCourse = event.target.value;
+      setSelectedCourses(prevCourses => [...prevCourses, takenCourse]);
+      await sendSelectedCourses([...selectedCourses, takenCourse]);
+      event.target.value = ''; // Clear the input field after pushing the course
+    }
+  };
+
+  const sendSelectedCourses = async (takenCourses) => {
+    try {
+      const response = await fetch('http://localhost:5001/selected-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ takenCourses }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send selected courses to the backend');
+      }
+    } catch (error) {
+      console.error('Error sending selected courses to the backend:', error);
+    }
+  };
+
+  return (
+    <input onKeyDown={handleSelectChange} placeholder="Press Enter to add course"></input>
+  );
+}
+
+
 function App() {
 
   return (
@@ -470,6 +506,7 @@ function App() {
       <SecondaryMajorMenu />
       <MinorMenu />
       <CreditSlider/>
+      <PrevTakenCourses />
       <button onClick={() => window.location.reload()}>Submit</button>
       <ResetButton />
         <div className='container'>

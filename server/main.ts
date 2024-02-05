@@ -12,13 +12,13 @@ function schedToJSON(schedule: string[][]) {
   var jsonObject: any = {};
 
   schedule.forEach(function (subArray, index) {
-    const subObject: any = {}; // Initialize an empty object for each subArray
+    const subObject: any = {}; 
 
     subArray.forEach(function (item, itemIndex) {
       subObject["Course " + (itemIndex + 1)] = item;
     });
 
-    jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+    jsonObject["Semester " + (index + 1)] = subObject; 
   });
 
   return JSON.stringify(jsonObject, null, 2);
@@ -28,16 +28,16 @@ async function testFunc() {
   try {
     const data = await fetchData();
     const selectedMajors = [data.primary]
+    const desiredCourses: string[] = []
+    const coursesAlreadyTaken: string[] = [].concat(data.takenCourses)
+    console.log('courses already taken: ')
+    console.log(coursesAlreadyTaken)
     data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
     data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor")
     const finalMajorArr = ['GENED','GENED2'].concat(selectedMajors)
-    console.log(finalMajorArr)
-    const testCourses: string[] = []
-    const coursesAlreadyTaken: string[] = [];
     const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
     const creditLimit = data.credits;
-    console.log(typeof data.credits)
-    let schedule = generateSchedule(coursesAlreadyTaken,testCourses,finalMajorArr,allData,creditLimit);
+    let schedule = generateSchedule(coursesAlreadyTaken,desiredCourses,finalMajorArr,allData,creditLimit);
     console.log(schedule)
     return schedToJSON(schedule)
   } catch (error) {
@@ -70,16 +70,10 @@ function generateSchedule(coursesTaken: string[],userRequestedCourses: string[],
 }
 
 function generateSingleSchedule(coursesAlreadyTaken: string[],list: string[], majors: string[], allData:any,creditLimit:number){
- // console.log('iteration')
-  // console.log(list)
 
   let completedSchedule = completeSchedule(coursesAlreadyTaken,list,majors,allData);
-  // console.log(completedSchedule)
-  
+
   let finishedSchedule = scheduleFromCourseList(completedSchedule,allData,creditLimit,coursesAlreadyTaken);
-  // console.log(finishedSchedule)
-  // console.log(getTotalCreditNumber(finishedSchedule,allData))
-  // console.log('\n')
   
   return finishedSchedule
 }

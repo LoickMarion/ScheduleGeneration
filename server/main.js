@@ -45,17 +45,17 @@ testFunc();
 function schedToJSON(schedule) {
     var jsonObject = {};
     schedule.forEach(function (subArray, index) {
-        var subObject = {}; // Initialize an empty object for each subArray
+        var subObject = {};
         subArray.forEach(function (item, itemIndex) {
             subObject["Course " + (itemIndex + 1)] = item;
         });
-        jsonObject["Semester " + (index + 1)] = subObject; // Assign the subObject to the corresponding key
+        jsonObject["Semester " + (index + 1)] = subObject;
     });
     return JSON.stringify(jsonObject, null, 2);
 }
 function testFunc() {
     return __awaiter(this, void 0, void 0, function () {
-        var data, selectedMajors, finalMajorArr, testCourses, coursesAlreadyTaken, allData, creditLimit, schedule, error_1;
+        var data, selectedMajors, desiredCourses, coursesAlreadyTaken, finalMajorArr, allData, creditLimit, schedule, error_1;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -65,12 +65,13 @@ function testFunc() {
                 case 1:
                     data = _a.sent();
                     selectedMajors = [data.primary];
+                    desiredCourses = [];
+                    coursesAlreadyTaken = [].concat(data.takenCourses);
+                    console.log('courses already taken: ');
+                    console.log(coursesAlreadyTaken);
                     data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
                     data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor");
                     finalMajorArr = ['GENED', 'GENED2'].concat(selectedMajors);
-                    console.log(finalMajorArr);
-                    testCourses = [];
-                    coursesAlreadyTaken = [];
                     return [4 /*yield*/, Promise.all(finalMajorArr.map(function (major) { return __awaiter(_this, void 0, void 0, function () { return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0: return [4 /*yield*/, (0, database_1.getMajorData)(major)];
@@ -80,8 +81,7 @@ function testFunc() {
                 case 2:
                     allData = _a.sent();
                     creditLimit = data.credits;
-                    console.log(typeof data.credits);
-                    schedule = generateSchedule(coursesAlreadyTaken, testCourses, finalMajorArr, allData, creditLimit);
+                    schedule = generateSchedule(coursesAlreadyTaken, desiredCourses, finalMajorArr, allData, creditLimit);
                     console.log(schedule);
                     return [2 /*return*/, schedToJSON(schedule)];
                 case 3:
@@ -126,14 +126,8 @@ function generateSchedule(coursesTaken, userRequestedCourses, majors, allData, c
     return completedSchedules[0];
 }
 function generateSingleSchedule(coursesAlreadyTaken, list, majors, allData, creditLimit) {
-    // console.log('iteration')
-    // console.log(list)
     var completedSchedule = completeSchedule(coursesAlreadyTaken, list, majors, allData);
-    // console.log(completedSchedule)
     var finishedSchedule = scheduleFromCourseList(completedSchedule, allData, creditLimit, coursesAlreadyTaken);
-    // console.log(finishedSchedule)
-    // console.log(getTotalCreditNumber(finishedSchedule,allData))
-    // console.log('\n')
     return finishedSchedule;
 }
 function scheduleFromCourseList(classesInSchedule, allData, creditLimit, coursesAlreadyTaken) {
