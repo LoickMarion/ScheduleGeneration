@@ -86,18 +86,18 @@ export class Graph<T>{
   private numCoursesUnlockedMap: Map<string, number>;
   private courseList: string[];
   private creditLimit: number;
-  private sortedClasses: string[];
+  private coursesPreviouslyTaken: string[]
 
   
 
-  constructor(nodeMap: Map<string,Node<T>>, courseList: string[], creditLimit: number){
+  constructor(nodeMap: Map<string,Node<T>>, courseList: string[], coursesPreviouslyTaken: string[], creditLimit: number){
     //this.node_list = node_list;
     this.nodeMap = nodeMap;
     this.courseList = courseList;
     this.creditLimit = creditLimit;
     this.numCoursesUnlockedMap = new Map<string,number>;
+    this.coursesPreviouslyTaken = coursesPreviouslyTaken;
     this.addPrereqLinks();
-    this.sortedClasses = this.topoSort();
   }
 
   topoSort(){
@@ -137,7 +137,7 @@ export class Graph<T>{
       if(course){
         finalList.push(course);
 
-        //add all nodes with one remianing prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
+        //add all nodes with one remaining prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
         this.nodeMap.get(course)!.getAdjacent().forEach((courseName)=>{
           if(incomingEdgeDict.get(courseName)==1){
             workingList.push(courseName)
@@ -195,7 +195,8 @@ export class Graph<T>{
   makeSchedule(){
     const schedule: string[][] = []
     const classesToAdd = this.topoSort()
-    const coursesTaken: string[] = []
+    const coursesTaken: string[] = this.coursesPreviouslyTaken
+    console.log(this.coursesPreviouslyTaken)
     
     
     while (classesToAdd.length > 0){
@@ -212,7 +213,10 @@ export class Graph<T>{
       //console.log(coursesEligibleToTake);
 
       for(const course of coursesEligibleToTake){
-        if(this.enoughSpace(course,creditsInSem)){
+        if(this.coursesPreviouslyTaken.includes(course)){
+          classesToAdd.splice(classesToAdd.indexOf(course),1)
+        }
+        else if(this.enoughSpace(course,creditsInSem)){
           creditsInSem += this.nodeMap.get(course)!.getCourse().getCredits();
           coursesInSem.push(course)
           classesToAdd.splice(classesToAdd.indexOf(course),1)
@@ -226,4 +230,3 @@ export class Graph<T>{
     return schedule;
   }
 }
-

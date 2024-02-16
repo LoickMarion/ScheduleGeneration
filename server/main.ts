@@ -28,16 +28,15 @@ async function testFunc() {
   try {
     const data = await fetchData();
     const selectedMajors = [data.primary]
+    console.log(selectedMajors)
     const desiredCourses: string[] = []
-    const coursesAlreadyTaken: string[] = [].concat(data.takenCourses)
-    console.log('courses already taken: ')
-    console.log(coursesAlreadyTaken)
-    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major");
+    data.secondary != null ? selectedMajors.push(data.secondary) : console.log("No secondary major")
+    data.tertiary != null ? selectedMajors.push(data.tertiary) : console.log("No tertiary major")
     data.minor != null ? selectedMajors.push(data.minor) : console.log("No minor")
-    const finalMajorArr = ['GENED','GENED2'].concat(selectedMajors)
-    const allData = await Promise.all(finalMajorArr.map(async major => await getMajorData(major)))
+    !data.hasGenEds ? selectedMajors.push('GENED', 'GENED2') : console.log("Gen eds already taken")
+    const allData = await Promise.all(selectedMajors.map(async major => await getMajorData(major)))
     const creditLimit = data.credits;
-    let schedule = generateSchedule(coursesAlreadyTaken,desiredCourses,finalMajorArr,allData,creditLimit);
+    let schedule = generateSchedule(data.takenCourses,desiredCourses,selectedMajors,allData,creditLimit);
     console.log(schedule)
     return schedToJSON(schedule)
   } catch (error) {
@@ -54,11 +53,10 @@ async function fetchData() {
   }
 }
 
-function generateSchedule(coursesTaken: string[],userRequestedCourses: string[], majors: string[], allData: any,creditLimit:number) {
+function generateSchedule(coursesAlreadyTaken: string[], userRequestedCourses: string[], majors: string[], allData: any,creditLimit:number) {
   let masterList: string[][] = [];
   expandUserInputViaPrereqs([], userRequestedCourses, masterList, allData);
   let completedSchedules:string[][][] = []
-  let coursesAlreadyTaken = []
   masterList.forEach((list) => {
   const b: string[][] = generateSingleSchedule(coursesAlreadyTaken,list,majors,allData,creditLimit);
   
@@ -111,7 +109,7 @@ function scheduleFromCourseList(classesInSchedule: string[], allData: any,credit
   classList.forEach((Course) => classStringList.push(Course.getMajor() + Course.getNumber()))
   classList.forEach((Course) => classMap.set(Course.getMajor() + Course.getNumber(), Course));
 
-  const graph = new Graph<Node<Course>>(nodeMap, classStringList, creditLimit)
+  const graph = new Graph<Node<Course>>(nodeMap, classStringList, coursesAlreadyTaken, creditLimit)
   return graph.makeSchedule()
 }
 

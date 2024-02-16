@@ -70,14 +70,14 @@ var Node = /** @class */ (function () {
 }());
 exports.Node = Node;
 var Graph = /** @class */ (function () {
-    function Graph(nodeMap, courseList, creditLimit) {
+    function Graph(nodeMap, courseList, coursesPreviouslyTaken, creditLimit) {
         //this.node_list = node_list;
         this.nodeMap = nodeMap;
         this.courseList = courseList;
         this.creditLimit = creditLimit;
         this.numCoursesUnlockedMap = new Map;
+        this.coursesPreviouslyTaken = coursesPreviouslyTaken;
         this.addPrereqLinks();
-        this.sortedClasses = this.topoSort();
     }
     Graph.prototype.topoSort = function () {
         var _this = this;
@@ -111,7 +111,7 @@ var Graph = /** @class */ (function () {
             var course = workingList.shift();
             if (course) {
                 finalList.push(course);
-                //add all nodes with one remianing prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
+                //add all nodes with one remaining prereq adjacent to this node ( 0 after processing this) to the working list. remove 1 from remainging edges map
                 this.nodeMap.get(course).getAdjacent().forEach(function (courseName) {
                     if (incomingEdgeDict.get(courseName) == 1) {
                         workingList.push(courseName);
@@ -161,7 +161,8 @@ var Graph = /** @class */ (function () {
         var _this = this;
         var schedule = [];
         var classesToAdd = this.topoSort();
-        var coursesTaken = [];
+        var coursesTaken = this.coursesPreviouslyTaken;
+        console.log(this.coursesPreviouslyTaken);
         while (classesToAdd.length > 0) {
             //console.log(classesToAdd)
             var creditsInSem = 0;
@@ -175,7 +176,10 @@ var Graph = /** @class */ (function () {
             //console.log(coursesEligibleToTake);
             for (var _i = 0, coursesEligibleToTake_1 = coursesEligibleToTake; _i < coursesEligibleToTake_1.length; _i++) {
                 var course = coursesEligibleToTake_1[_i];
-                if (this.enoughSpace(course, creditsInSem)) {
+                if (this.coursesPreviouslyTaken.includes(course)) {
+                    classesToAdd.splice(classesToAdd.indexOf(course), 1);
+                }
+                else if (this.enoughSpace(course, creditsInSem)) {
                     creditsInSem += this.nodeMap.get(course).getCourse().getCredits();
                     coursesInSem.push(course);
                     classesToAdd.splice(classesToAdd.indexOf(course), 1);

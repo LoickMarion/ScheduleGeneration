@@ -9,9 +9,11 @@ const port = 5001;
 let selectedData = {
   primary: null,
   secondary: null,
+  tertiary: null,
   minor: null,
   credits: 12,
-  takenCourses: []
+  takenCourses: [],
+  hasGenEds: false
 };
 
 
@@ -32,21 +34,27 @@ app.get('/', async (req, res) => {
 app.post('/selected-data', (req, res) => {
   try {
     console.log(req.body)
-    const { primaryMajor, secondaryMajor, minor, credits, takenCourses } = req.body;
+    const { primaryMajor, secondaryMajor, thirdMajor, minor, credits, takenCourses, hasGenEds} = req.body;
     if (primaryMajor !== undefined) {
       selectedData.primary = primaryMajor;
     }
     if (secondaryMajor !== undefined) {
       selectedData.secondary = secondaryMajor;
     }
+    if (thirdMajor !== undefined){
+      selectedData.tertiary = thirdMajor
+    }
     if (minor !== undefined){
       selectedData.minor = minor;
     }
-    if(credits !== undefined){
+    if (credits !== undefined){
       selectedData.credits = credits;
     }
-    if(takenCourses != undefined){
+    if (takenCourses != undefined){
       selectedData.takenCourses = takenCourses;
+    }
+    if (hasGenEds != undefined){
+      selectedData.hasGenEds = hasGenEds
     }
     console.log('Received selected data:', selectedData);
     res.status(200).send('Received selected major successfully');
@@ -76,9 +84,11 @@ app.post('/reset-majors', (req, res) => {
     selectedData = {
       primary: null,
       secondary: null,
+      tertiary: null,
       minor: null,
       credits: 12,
-      takenCourses: []
+      takenCourses: [],
+      hasGenEds: false
     };
     console.log('Selected majors reset successfully');
     res.status(200).send('Selected majors reset successfully');

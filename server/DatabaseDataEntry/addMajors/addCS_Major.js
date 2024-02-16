@@ -40,7 +40,6 @@ const cs_others = [
     ['CS', 'CSLAB', 'PHYSICS181'],
     ['CS', 'CSLAB', 'PHYSICS152'],
     ['CS', 'CSLAB', 'PHYSICS182']
-
 ]
 
 const specifics = [
